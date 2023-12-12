@@ -323,7 +323,7 @@ $(document).ready(function() {
                     // 删除成功后的处理
                     alert('删除成功');
                     console.log('批量删除成功:', response);
-                    location.reload();
+                    fetchPartners();
                     // 在这里可以进行其他操作，如更新界面等
                 },
                 error: function(xhr, status, error) {
