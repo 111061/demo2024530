@@ -323,7 +323,30 @@ $(document).on('click', '#send-mail-to-employees-btn', function() {
 
     // 发送邮件的逻辑
     alert('发送邮件给员工:\n主题: ' + mailSubject + '\n内容: ' + mailBody + '\n帐号: ' + mailAccount + '\n密码: ' + mailPassword + '\n收件人邮箱: ' + selectedEmails);
+            // 构建要发送的数据
+    var emailDetails = {
+        emails: selectedEmails,
+        subject: mailSubject,
+        content: mailBody,
+        account: mailAccount,
+        password: mailPassword
+    };
   // 您可以在这里添加 AJAX 调用来实际发送邮件
+        // 发送AJAX POST请求
+    $.ajax({
+        url: '/api/employees/sendEmails', // 确保这是正确的端点地址
+        type: 'POST',
+        contentType: 'application/json', // 发送数据的类型
+        data: JSON.stringify(emailDetails), // 将JavaScript对象转换为JSON字符串
+        success: function(response) {
+            console.log(response); // 请求成功时打印服务器返回的响应
+            alert('邮件发送成功！');
+        },
+        error: function(xhr, status, error) {
+            console.error(error); // 请求失败时打印错误信息
+            alert('邮件发送失败！');
+        }
+    });
 });
 
 // 监听发送邮件给合作夥伴的按钮点击事件
@@ -340,7 +363,9 @@ $(document).on('click', '#send-mail-to-partners-btn', function() {
 
     // 发送邮件的逻辑
     alert('发送邮件给员工:\n主题: ' + mailSubject + '\n内容: ' + mailBody + '\n帐号: ' + mailAccount + '\n密码: ' + mailPassword + '\n收件人邮箱: ' + selectedEmails);
+
   // 您可以在这里添加 AJAX 调用来实际发送邮件
+
 });
 
 
