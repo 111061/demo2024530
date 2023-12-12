@@ -103,7 +103,7 @@ $(document).ready(function() {
                 
                 // 使用获取的数据填充表格
                 $.each(employees, function(index, employee) {
-                    employeesContent += '<tr><td><input type="checkbox" class="employee-checkbox"></td><td>' + employee.employeeId + '</td><td>' + employee.name + '</td><td>' + employee.gender + '</td><td>' + employee.birthday + '</td><td>' + employee.mail + '</td><td>' + employee.tel + '</td><td>' + employee.address + '</td>';
+                    employeesContent += '<tr><td><input type="checkbox" class="employee-checkbox"data-email="' + employee.mail + '"></td><td>' + employee.employeeId + '</td><td>' + employee.name + '</td><td>' + employee.gender + '</td><td>' + employee.birthday + '</td><td>' + employee.mail + '</td><td>' + employee.tel + '</td><td>' + employee.address + '</td>';
                     employeesContent += '<td class="operation-buttons"><button class="btn btn-info btn-sm">變更</button></td></tr>';
                 });
 
@@ -144,7 +144,7 @@ $(document).ready(function() {
             partnersContent += '<thead><tr><th><input type="checkbox" id="select-all-partners"></th><th>公司ID</th><th>公司名稱</th><th>銷售代表</th><th>郵箱</th><th>操作</th></tr></thead><tbody>';
             // 使用获取的数据填充表格
             $.each(partners, function(index, partner) {
-                partnersContent += '<tr><td><input type="checkbox" class="partner-checkbox"></td><td>' + partner.comId + '</td><td>' + partner.company + '</td><td>' + partner.salesRep + '</td><td>' + partner.mail + '</td>';
+                partnersContent += '<tr><td><input type="checkbox" class="partner-checkbox" data-email="' + partner.mail + '"></td><td>' + partner.comId + '</td><td>' + partner.company + '</td><td>' + partner.salesRep + '</td><td>' + partner.mail + '</td>';
                 partnersContent += '<td class="operation-buttons"><button class="btn btn-info btn-sm">變更</button></td></tr>';
             });
 
@@ -316,10 +316,14 @@ $(document).on('click', '#send-mail-to-employees-btn', function() {
     var mailBody = $('#employee-mail-body').val();
     var mailAccount = $('#email-account').val();
     var mailPassword = $('#email-password').val();
+      // 收集选中的邮箱地址
+    var selectedEmails = $('.employee-checkbox:checked').map(function() {
+        return $(this).data('email');
+    }).get().join(", ");
 
     // 发送邮件的逻辑
-    alert('发送邮件给员工:\n主题: ' + mailSubject + '\n内容: ' + mailBody + '\n帳號: ' + mailAccount + '\n密碼: ' + mailPassword);
-    // 您可以在这里添加 AJAX 调用来实际发送邮件
+    alert('发送邮件给员工:\n主题: ' + mailSubject + '\n内容: ' + mailBody + '\n帐号: ' + mailAccount + '\n密码: ' + mailPassword + '\n收件人邮箱: ' + selectedEmails);
+  // 您可以在这里添加 AJAX 调用来实际发送邮件
 });
 
 // 监听发送邮件给合作夥伴的按钮点击事件
@@ -329,10 +333,14 @@ $(document).on('click', '#send-mail-to-partners-btn', function() {
     var mailBody = $('#partner-mail-body').val();
     var mailAccount = $('#email-account').val();
     var mailPassword = $('#email-password').val();
+          // 收集选中的邮箱地址
+    var selectedEmails = $('.partner-checkbox:checked').map(function() {
+        return $(this).data('email');
+    }).get().join(", ");
 
     // 发送邮件的逻辑
-    alert('发送邮件给员工:\n主题: ' + mailSubject + '\n内容: ' + mailBody + '\n帳號: ' + mailAccount + '\n密碼: ' + mailPassword);
-    // 您可以在这里添加 AJAX 调用来实际发送邮件
+    alert('发送邮件给员工:\n主题: ' + mailSubject + '\n内容: ' + mailBody + '\n帐号: ' + mailAccount + '\n密码: ' + mailPassword + '\n收件人邮箱: ' + selectedEmails);
+  // 您可以在这里添加 AJAX 调用来实际发送邮件
 });
 
 
