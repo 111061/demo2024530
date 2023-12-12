@@ -242,7 +242,8 @@ $(document).ready(function() {
     // 將新增員工和新增合作夥伴的函數綁定到按鈕的點擊事件
     $('#add-employee-btn').click(addEmployee);
     $('#add-partner-btn').click(addPartner);
-        // 当员工全选 Checkbox 状态改变时
+
+    // 当员工全选 Checkbox 状态改变时
     $(document).on('click', '#select-all-employees', function() {
         $('.employee-checkbox').prop('checked', this.checked).trigger('change');
     });
@@ -303,10 +304,37 @@ $(document).ready(function() {
     // 当点击合作夥伴删除按钮时
     $(document).on('click', '#delete-selected-partners', function() {
         var selectedCheckboxes = $('.partner-checkbox:checked');
+        var selectedIds = [];
         selectedCheckboxes.each(function() {
-            alert('刪除按鈕成功！');
+
             // 合作夥伴删除逻辑
+             var partnerId = $(this).closest('tr').find('td:eq(1)').text();
+            selectedIds.push(partnerId);//保存选中ID
         });
+        var confirmation = confirm("确定要批量删除所选合作伙伴吗？");
+        if (confirmation) {
+            // 发送 AJAX 请求删除所选项
+            $.ajax({
+                url: '/api/partners/delete', // 你的删除多个项的 API URL
+                type: 'DELETE',
+                contentType: 'application/json',
+                data: JSON.stringify(selectedIds), // 发送要删除的员工ID列表
+                success: function(response) {
+                    // 删除成功后的处理
+                    alert('删除成功');
+                    console.log('批量删除成功:', response);
+                    location.reload();
+                    // 在这里可以进行其他操作，如更新界面等
+                },
+                error: function(xhr, status, error) {
+                    // 删除失败时的处理
+                    alert('删除失败');
+                    // 可以在此处提供用户错误信息或其他处理
+                }
+            });
+        } else {
+            alert('已取消');
+        }
         $('.partner-checkbox:checked').prop('checked', false).trigger('change'); // 取消选中状态并触发更改事件
     });
     // 监听发送邮件给员工的按钮点击事件
