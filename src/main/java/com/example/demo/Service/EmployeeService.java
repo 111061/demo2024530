@@ -29,6 +29,8 @@ public class EmployeeService {
         // 處理新增員工的邏輯
         return employeeRepository.save(employee);
     }
-
+    public void deleteEmployeeById(Long id){
+        employeeRepository.deleteById(id);
+    }
     // 其他查詢方法...
 }

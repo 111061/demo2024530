@@ -56,5 +56,21 @@ public class EmployeeController {
         }
     }
 
+    //批量删除员工
+    @DeleteMapping("/delete")
+    public ResponseEntity<List<Employee>> deleteEmployee(@RequestBody List<Long> employeeIds){
+        try {
+            for (Long employeeId : employeeIds) {
+                employeeService.deleteEmployeeById(employeeId);
+            }
+            return new ResponseEntity<>(HttpStatus.OK);
+
+        } catch (Exception e) {
+            // 日志记录异常信息
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+
+    }
+
 
 }
