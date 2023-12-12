@@ -314,9 +314,11 @@ $(document).on('click', '#send-mail-to-employees-btn', function() {
     // 获取邮件主题和内容
     var mailSubject = $('#employee-mail-subject').val();
     var mailBody = $('#employee-mail-body').val();
+    var mailAccount = $('#email-account').val();
+    var mailPassword = $('#email-password').val();
 
     // 发送邮件的逻辑
-    alert('发送邮件给员工:\n主题: ' + mailSubject + '\n内容: ' + mailBody);
+    alert('发送邮件给员工:\n主题: ' + mailSubject + '\n内容: ' + mailBody + '\n帳號: ' + mailAccount + '\n密碼: ' + mailPassword);
     // 您可以在这里添加 AJAX 调用来实际发送邮件
 });
 
@@ -325,9 +327,11 @@ $(document).on('click', '#send-mail-to-partners-btn', function() {
     // 获取邮件主题和内容
     var mailSubject = $('#partner-mail-subject').val();
     var mailBody = $('#partner-mail-body').val();
+    var mailAccount = $('#email-account').val();
+    var mailPassword = $('#email-password').val();
 
     // 发送邮件的逻辑
-    alert('发送邮件给员工:\n主题: ' + mailSubject + '\n内容: ' + mailBody);
+    alert('发送邮件给员工:\n主题: ' + mailSubject + '\n内容: ' + mailBody + '\n帳號: ' + mailAccount + '\n密碼: ' + mailPassword);
     // 您可以在这里添加 AJAX 调用来实际发送邮件
 });
 
