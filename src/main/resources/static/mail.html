@@ -49,7 +49,17 @@
             <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pb-2 mb-3 border-bottom">
                 <h1 class="h2">信箱管理列表</h1>
             </div>
-  
+                <!-- 在内容区域顶部添加电子邮件账号和密码输入框 -->
+            <div class="email-authentication-form py-3">
+                <div class="mb-3">
+                    <label for="email-account" class="form-label">郵件帳號</label>
+                    <input type="email" class="form-control" id="email-account" placeholder="name@example.com">
+                </div>
+                <div class="mb-3">
+                    <label for="email-password" class="form-label">密碼</label>
+                    <input type="password" class="form-control" id="email-password" placeholder="Password">
+                </div>
+            </div>
             <div id="content">
             </div>
         </main>
@@ -96,7 +106,13 @@ $(document).ready(function() {
                 });
 
                 employeesContent += '</tbody></table>';
-                employeesContent += '<button id="delete-selected-employees" class="btn btn-danger btn-sm btn-lg" style="display:none;">刪除選定</button>';
+                employeesContent += '<div id="send-mail-to-employees-form" style="margin-top: 15px;">';
+                employeesContent += '<h3>發送郵件給員工</h3>';
+                employeesContent += '<input type="text" id="employee-mail-subject" placeholder="主題" class="form-control">';
+                employeesContent += '<textarea id="employee-mail-body" placeholder="內容" class="form-control" rows="4"></textarea>';
+                employeesContent += '<button id="delete-selected-employees" class="btn btn-danger btn-sm mt-2 me-2" style="display:none;">刪除選定</button>';
+                employeesContent += '<button id="send-mail-to-employees-btn" class="btn btn-secondary btn-sm mt-2" style="display:none;">發送郵件</button></div>';
+
                 $('#content').html(employeesContent);
             },
             error: function() {
@@ -131,7 +147,12 @@ $(document).ready(function() {
             });
 
             partnersContent += '</tbody></table>';
-            partnersContent += '<button id="delete-selected-partners" class="btn btn-danger btn-sm btn-lg" style="display:none;">刪除選定</button>';
+            partnersContent += '<div id="send-mail-to-partners-form" style="margin-top: 15px;">';
+            partnersContent += '<h3>發送郵件給合作夥伴</h3>';
+            partnersContent += '<input type="text" id="partner-mail-subject" placeholder="主題" class="form-control">';
+            partnersContent += '<textarea id="partner-mail-body" placeholder="內容" class="form-control" rows="4"></textarea>';
+            partnersContent += '<button id="delete-selected-partners" class="btn btn-danger btn-sm mt-2 me-2" style="display:none;">刪除選定</button>';
+            partnersContent += '<button id="send-mail-to-partners-btn" class="btn btn-secondary btn-sm mt-2" style="display:none;">發送郵件</button>';
             $('#content').html(partnersContent);
         },
         error: function(request, status, error) {
@@ -228,16 +249,17 @@ $(document).ready(function() {
     $(document).on('change', '.employee-checkbox', function() {
         var anyChecked = $('.employee-checkbox:checked').length > 0;
         $('#delete-selected-employees').toggle(anyChecked); // 显示或隐藏员工删除按钮
+        $('#send-mail-to-employees-btn').toggle(anyChecked);
     });
 
     // 当点击员工删除按钮时
     $(document).on('click', '#delete-selected-employees', function() {
+        alert('刪除按鈕成功！');
         var selectedCheckboxes = $('.employee-checkbox:checked');
         selectedCheckboxes.each(function() {
-            alert('刪除按鈕成功！');
             // 员工删除逻辑
         });
-        $(this).hide();
+        $('.employee-checkbox:checked').prop('checked', false).trigger('change'); // 取消选中状态并触发更改事件
     });
         // 当合作夥伴全选 Checkbox 状态改变时
     $(document).on('click', '#select-all-partners', function() {
@@ -248,6 +270,7 @@ $(document).ready(function() {
     $(document).on('change', '.partner-checkbox', function() {
         var anyChecked = $('.partner-checkbox:checked').length > 0;
         $('#delete-selected-partners').toggle(anyChecked); // 显示或隐藏合作夥伴删除按钮
+        $('#send-mail-to-partners-btn').toggle(anyChecked);
     });
 
     // 当点击合作夥伴删除按钮时
@@ -257,8 +280,29 @@ $(document).ready(function() {
             alert('刪除按鈕成功！');
             // 合作夥伴删除逻辑
         });
-        $(this).hide();
+        $('.partner-checkbox:checked').prop('checked', false).trigger('change'); // 取消选中状态并触发更改事件
     });
+    // 监听发送邮件给员工的按钮点击事件
+$(document).on('click', '#send-mail-to-employees-btn', function() {
+    // 获取邮件主题和内容
+    var mailSubject = $('#employee-mail-subject').val();
+    var mailBody = $('#employee-mail-body').val();
+
+    // 发送邮件的逻辑
+    alert('发送邮件给员工:\n主题: ' + mailSubject + '\n内容: ' + mailBody);
+    // 您可以在这里添加 AJAX 调用来实际发送邮件
+});
+
+// 监听发送邮件给合作夥伴的按钮点击事件
+$(document).on('click', '#send-mail-to-partners-btn', function() {
+    // 获取邮件主题和内容
+    var mailSubject = $('#partner-mail-subject').val();
+    var mailBody = $('#partner-mail-body').val();
+
+    // 发送邮件的逻辑
+    alert('发送邮件给员工:\n主题: ' + mailSubject + '\n内容: ' + mailBody);
+    // 您可以在这里添加 AJAX 调用来实际发送邮件
+});
 
 
 

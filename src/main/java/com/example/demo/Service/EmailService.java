@@ -12,23 +12,23 @@ public class EmailService {
     public void sendEmail(String to, String subject, String content) {
         // 邮件发送属性配置
         Properties props = new Properties();
-        props.put("mail.smtp.host", "smtp.example.com");
-        props.put("mail.smtp.port", "587");
-        props.put("mail.smtp.auth", "true");
-        props.put("mail.smtp.starttls.enable", "true");
+        props.put("mail.smtp.host", "smtp.gmail.com"); // 使用 Gmail 的SMTP服务器
+        props.put("mail.smtp.port", "587"); // Gmail 的SMTP服务器使用的端口号为 587
+        props.put("mail.smtp.auth", "true"); // 需要请求认证
+        props.put("mail.smtp.starttls.enable", "true"); // 使用 STARTTLS 安全连接
         // 更多配置...
 
         // 创建邮件会话
         Session session = Session.getInstance(props, new jakarta.mail.Authenticator() {
             protected jakarta.mail.PasswordAuthentication getPasswordAuthentication() {
-                return new jakarta.mail.PasswordAuthentication("username", "password");
+                return new jakarta.mail.PasswordAuthentication("a10443087jpp@gmail.com", "axcj awqp ebnn ioup");
             }
         });
 
         try {
             // 创建邮件消息
             Message message = new MimeMessage(session);
-            message.setFrom(new InternetAddress("from@example.com"));
+            message.setFrom(new InternetAddress("a10443087jpp@gmail.com"));
             message.setRecipients(Message.RecipientType.TO, InternetAddress.parse(to));
             message.setSubject(subject);
             message.setText(content);
