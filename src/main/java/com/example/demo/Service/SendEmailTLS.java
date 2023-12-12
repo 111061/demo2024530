@@ -6,7 +6,6 @@ import jakarta.mail.Transport;
 import jakarta.mail.internet.InternetAddress;
 import jakarta.mail.internet.MimeMessage;
 import java.util.Properties;
-import jakarta.mail.Authenticator;
 import jakarta.mail.PasswordAuthentication;
 
 public class SendEmailTLS {

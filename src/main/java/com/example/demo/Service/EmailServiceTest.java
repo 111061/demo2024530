@@ -8,9 +8,11 @@ public class EmailServiceTest {
         // 邮件主题
         String subject = "Test Email Subject";
         // 邮件内容
-        String content = "Hello, this is a test email from Jakarta Mail API.";
+        String content = "Hello, this is a test email from Jakarta Mail API2.";
+        String account ="a10443087jpp@gmail.com";
+        String password ="axcj awqp ebnn ioup";
 
         // 调用发送邮件的服务方法
-        emailService.sendEmail(toEmail, subject, content);
+        emailService.sendEmail(toEmail, subject, content, account, password);
     }
 }

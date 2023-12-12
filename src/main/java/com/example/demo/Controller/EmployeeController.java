@@ -7,6 +7,8 @@ import com.example.demo.DTO.Employee;
 import com.example.demo.Service.EmployeeService;
 import java.util.List;
 import org.springframework.http.HttpStatus;
+import com.example.demo.Service.EmailService;
+import com.example.demo.DTO.EmailDetails;
 
 @RestController
 
@@ -15,6 +17,8 @@ public class EmployeeController {
 
     @Autowired
     private EmployeeService employeeService;
+    @Autowired
+    private EmailService emailService;
 
     // 获取所有员工
     @GetMapping("/test")
@@ -70,6 +74,28 @@ public class EmployeeController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
 
+    }
+    // 群发邮件
+    @PostMapping("/sendEmails")
+    public ResponseEntity<?> sendEmailsToEmployees(@RequestBody EmailDetails details) {
+        try {
+            // 获取邮件详情
+            String subject = details.getSubject();
+            String content = details.getContent();
+            String account = details.getAccount();
+            String password = details.getPassword();
+
+            // 对列表中的每个电子邮件地址发送邮件
+            for (String email : details.getEmails()) {
+                emailService.sendEmail(email, subject, content, account, password);
+            }
+
+            return new ResponseEntity<>("Emails sent successfully!", HttpStatus.OK);
+
+        } catch (Exception e) {
+            e.printStackTrace(); // 增加错误输出
+            return new ResponseEntity<>("Error sending emails", HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
 
 

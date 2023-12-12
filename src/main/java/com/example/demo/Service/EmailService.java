@@ -5,11 +5,13 @@ import jakarta.mail.Session;
 import jakarta.mail.Transport;
 import jakarta.mail.internet.InternetAddress;
 import jakarta.mail.internet.MimeMessage;
-import java.util.Properties;
+import org.springframework.stereotype.Service;
 
+import java.util.Properties;
+@Service
 public class EmailService {
 
-    public void sendEmail(String to, String subject, String content) {
+    public void sendEmail(String to, String subject, String content, String account, String password) {
         // 邮件发送属性配置
         Properties props = new Properties();
         props.put("mail.smtp.host", "smtp.gmail.com"); // 使用 Gmail 的SMTP服务器
@@ -21,14 +23,14 @@ public class EmailService {
         // 创建邮件会话
         Session session = Session.getInstance(props, new jakarta.mail.Authenticator() {
             protected jakarta.mail.PasswordAuthentication getPasswordAuthentication() {
-                return new jakarta.mail.PasswordAuthentication("a10443087jpp@gmail.com", "axcj awqp ebnn ioup");
+                return new jakarta.mail.PasswordAuthentication(account,password);
             }
         });
 
         try {
             // 创建邮件消息
             Message message = new MimeMessage(session);
-            message.setFrom(new InternetAddress("a10443087jpp@gmail.com"));
+            message.setFrom(new InternetAddress(account));
             message.setRecipients(Message.RecipientType.TO, InternetAddress.parse(to));
             message.setSubject(subject);
             message.setText(content);
