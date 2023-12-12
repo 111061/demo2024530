@@ -47,20 +47,22 @@
         <!-- 内容区域 -->
         <main class="col-md-10 ml-sm-auto col-lg-10 pt-3 px-4">
             <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pb-2 mb-3 border-bottom">
-                <h1 class="h2">信箱管理列表</h1>
+            <h1 class="h2">信箱管理列表</h1>
+            <!-- 邮件认证表单 -->
+            <div class="email-authentication-form d-flex align-items-center">
+                <div class="me-2">
+                <label for="email-account" class="visually-hidden">郵件帳號</label>
+                <input type="email" class="form-control" id="email-account" placeholder="name@example.com">
+                </div>
+                <div class="me-2">
+                <label for="email-password" class="visually-hidden">密碼</label>
+                <input type="password" class="form-control" id="email-password" placeholder="Password">
+                </div>
+                <button class="btn btn-primary">登入</button>
             </div>
-                <!-- 在内容区域顶部添加电子邮件账号和密码输入框 -->
-            <div class="email-authentication-form py-3">
-                <div class="mb-3">
-                    <label for="email-account" class="form-label">郵件帳號</label>
-                    <input type="email" class="form-control" id="email-account" placeholder="name@example.com">
-                </div>
-                <div class="mb-3">
-                    <label for="email-password" class="form-label">密碼</label>
-                    <input type="password" class="form-control" id="email-password" placeholder="Password">
-                </div>
             </div>
             <div id="content">
+            <!-- 内容加载位置 -->
             </div>
         </main>
     </div>
