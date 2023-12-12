@@ -1,4 +1,5 @@
 package com.example.demo.Controller;
+import com.example.demo.DTO.Employee;
 import com.example.demo.DTO.Partner;
 import com.example.demo.Service.PartnerService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -43,7 +44,20 @@ public class PartnerController {
         }
     }
 
+    @DeleteMapping("/delete")
+    public ResponseEntity<List<Partner>> deletePartner(@RequestBody List<Long> partnerIds){
+        try {
+            for (Long partnerId : partnerIds) {
+                partnerService.deletePartnerById(partnerId);
+            }
+            return new ResponseEntity<>(HttpStatus.OK);
 
+        } catch (Exception e) {
+            // 日志记录异常信息
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+
+    }
 
     // 其他端点...
 }

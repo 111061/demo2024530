@@ -20,5 +20,8 @@ public class PartnerService {
         // 處理新增合作夥伴的邏輯
         return partnerRepository.save(partner);
     }
+    public void deletePartnerById(Long id){
+        partnerRepository.deleteById(id);
+    }
 
 }
