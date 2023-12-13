@@ -85,13 +85,10 @@ public class EmployeeController {
             String account = details.getAccount();
             String password = details.getPassword();
 
-            // 对列表中的每个电子邮件地址发送邮件
-            for (String email : details.getEmails()) {
-                emailService.sendEmail(email, subject, content, account, password);
-            }
+            // 发送邮件到所有收件人
+            emailService.sendEmail(details.getEmails(), subject, content, account, password);
 
             return new ResponseEntity<>("Emails sent successfully!", HttpStatus.OK);
-
         } catch (Exception e) {
             e.printStackTrace(); // 增加错误输出
             return new ResponseEntity<>("Error sending emails", HttpStatus.INTERNAL_SERVER_ERROR);
