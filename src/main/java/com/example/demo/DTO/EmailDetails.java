@@ -1,13 +1,27 @@
 package com.example.demo.DTO;
 
 import java.util.List;
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotEmpty;
+import jakarta.validation.constraints.NotNull;
+
 
 public class EmailDetails {
-    private List<String> emails; // 收件人邮箱列表
-    private String subject; // 邮件主题
-    private String content; // 邮件内容
-    private String account; // 发件人账号
-    private String password; // 发件人密码
+
+    @NotEmpty(message = "Email list cannot be empty")
+    private List<@Email(message = "Invalid email address") String> emails;
+
+    @NotNull(message = "Subject cannot be null")
+    private String subject;
+
+    @NotNull(message = "Content cannot be null")
+    private String content;
+
+    @NotNull(message = "Account cannot be null")
+    private String account;
+
+    @NotNull(message = "Password cannot be null")
+    private String password;
 
     // 无参构造器
     public EmailDetails() {
@@ -22,6 +36,7 @@ public class EmailDetails {
         this.password = password;
     }
 
+    // Getters and Setters...
     // Getters
     public List<String> getEmails() {
         return emails;

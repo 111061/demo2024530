@@ -21,6 +21,18 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-web'
     implementation 'mysql:mysql-connector-java:8.0.33'
     implementation 'com.sun.mail:jakarta.mail:2.0.1'
+    // Bean Validation API
+    implementation 'jakarta.validation:jakarta.validation-api:3.0.0'
+
+// Hibernate Validator
+    implementation 'org.hibernate.validator:hibernate-validator:7.0.1.Final'
+
+// Hibernate Validator's CDI integration (optional, only if you are using CDI)
+    implementation 'org.hibernate.validator:hibernate-validator-cdi:7.0.1.Final'
+
+// Required to use parameter name introspection
+    implementation 'org.glassfish:jakarta.el:4.0.0'
+
 }
 
 tasks.named('test') {
