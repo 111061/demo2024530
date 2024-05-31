@@ -1,0 +1,215 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>信箱管理系統 - 員工列表</title>
+    <link rel="stylesheet" href="css/bootstrap.min.css">
+    <style>
+        .sidebar {
+            min-height: 100vh;
+        }
+        .operation-buttons {
+            display: flex;
+            justify-content: space-around;
+        }
+        .btn-lg {
+            font-size: 1.25rem;
+            padding: .5rem 1rem;
+        }
+        .table th, .table td {
+            font-size: 1.2rem;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container-fluid">
+    <div class="row">
+        <nav class="col-md-2 d-md-block bg-dark sidebar">
+            <div class="sidebar-sticky">
+                <ul class="nav flex-column">
+                    <li class="nav-item">
+                        <a class="nav-link active text-white" href="employees.html" id="nav-employees">員工列表</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link text-white" href="partners.html" id="nav-partners">合作夥伴列表</a>
+                    </li>
+                </ul>
+            </div>
+        </nav>
+
+        <main class="col-md-10 ml-sm-auto col-lg-10 pt-3 px-4">
+            <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pb-2 mb-3 border-bottom">
+                <h1 class="h2">信箱管理列表</h1>
+                <div class="email-authentication-form d-flex align-items-center">
+                    <div class="me-2">
+                        <label for="email-account" class="visually-hidden">郵件帳號</label>
+                        <input type="email" class="form-control" id="email-account" placeholder="name@example.com">
+                    </div>
+                    <div class="me-2">
+                        <label for="email-password" class="visually-hidden">密碼</label>
+                        <input type="password" class="form-control" id="email-password" placeholder="Password">
+                    </div>
+                    <button class="btn btn-primary" style="display:none;">登入</button>
+                </div>
+            </div>
+            <div id="content">
+                <!-- 員工列表內容 -->
+            </div>
+        </main>
+    </div>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
+<script src="js/bootstrap.min.js"></script>
+<script>
+    $(document).ready(function() {
+        function fetchEmployees() {
+            $.ajax({
+                url: '/api/employees/test',
+                type: 'GET',
+                success: function(employees) {
+                    var employeesContent = '<h2>員工列表</h2>';
+                    employeesContent +='<div id="add-employee-form" style="margin-bottom: 15px;">'
+                    employeesContent +='<input type="text" id="employee-name" placeholder="名字">'
+                    employeesContent +='<input type="text" id="employee-gender" placeholder="性别">'
+                    employeesContent +=' <input type="text" id="employee-birthday" placeholder="生日">'
+                    employeesContent +='<input type="text" id="employee-mail" placeholder="邮箱">'
+                    employeesContent +='<input type="text" id="employee-tel" placeholder="电话">'
+                    employeesContent +='<input type="text" id="employee-address" placeholder="地址">'
+                    employeesContent += '<button id="add-employee-btn" class="btn btn-primary">新增员工</button>';
+                    employeesContent += '</div>'
+                    employeesContent += '<table class="table">';
+                    employeesContent += '<thead><tr><th><input type="checkbox" id="select-all-employees"></th><th>ID</th><th>名字</th><th>性別</th><th>生日</th><th>郵箱</th><th>電話</th><th>地址</th><th>操作</th></tr></thead><tbody>';
+
+                    $.each(employees, function(index, employee) {
+                        employeesContent += '<tr><td><input type="checkbox" class="employee-checkbox"data-email="' + employee.mail + '"></td><td>' + employee.employeeId + '</td><td>' + employee.name + '</td><td>' + employee.gender + '</td><td>' + employee.birthday + '</td><td>' + employee.mail + '</td><td>' + employee.tel + '</td><td>' + employee.address + '</td>';
+                        employeesContent += '<td class="operation-buttons"><button class="btn btn-info btn-sm">變更</button></td></tr>';
+                    });
+
+                    employeesContent += '</tbody></table>';
+                    employeesContent += '<div id="send-mail-to-employees-form" style="margin-top: 15px;">';
+                    employeesContent += '<h3>發送郵件給員工</h3>';
+                    employeesContent += '<input type="text" id="employee-mail-subject" placeholder="主題" class="form-control">';
+                    employeesContent += '<textarea id="employee-mail-body" placeholder="內容" class="form-control" rows="4"></textarea>';
+                    employeesContent += '<button id="delete-selected-employees" class="btn btn-danger btn-sm mt-2 me-2" style="display:none;">刪除選定</button>';
+                    employeesContent += '<button id="send-mail-to-employees-btn" class="btn btn-secondary btn-sm mt-2" style="display:none;">發送郵件</button></div>';
+
+                    $('#content').html(employeesContent);
+                },
+                error: function() {
+                    $('#content').html('<p>无法加载员工数据。</p>');
+                }
+            });
+        }
+
+        fetchEmployees();
+
+        $(document).on('click', '#add-employee-btn', function() {
+            var employeeData = {
+                name: $('#employee-name').val(),
+                gender: $('#employee-gender').val(),
+                birthday: $('#employee-birthday').val(),
+                mail: $('#employee-mail').val(),
+                tel: $('#employee-tel').val(),
+                address: $('#employee-address').val()
+            };
+            if (!employeeData.name || !employeeData.gender || !employeeData.birthday || !employeeData.mail || !employeeData.tel || !employeeData.address) {
+                alert('新增員工失敗！所有欄位都必須填寫。');
+                return;
+            }
+
+            $.ajax({
+                url: '/api/employees/add',
+                type: 'POST',
+                contentType: 'application/json',
+                data: JSON.stringify(employeeData),
+                success: function(data) {
+                    alert('員工新增成功！');
+                    fetchEmployees();
+                },
+                error: function(error) {
+                    alert('新增員工失敗！');
+                }
+            });
+        });
+
+        $(document).on('click', '#select-all-employees', function() {
+            $('.employee-checkbox').prop('checked', this.checked).trigger('change');
+        });
+
+        $(document).on('change', '.employee-checkbox', function() {
+            var anyChecked = $('.employee-checkbox:checked').length > 0;
+            $('#delete-selected-employees').toggle(anyChecked);
+            $('#send-mail-to-employees-btn').toggle(anyChecked);
+        });
+
+        $(document).on('click', '#delete-selected-employees', function() {
+            var selectedCheckboxes = $('.employee-checkbox:checked');
+            var selectedIds = [];
+            selectedCheckboxes.each(function() {
+                var employeeId = $(this).closest('tr').find('td:eq(1)').text();
+                selectedIds.push(employeeId);
+            });
+            var confirmation = confirm("确定要批量删除所选员工吗？");
+            if (confirmation) {
+                $.ajax({
+                    url: '/api/employees/delete',
+                    type: 'DELETE',
+                    contentType: 'application/json',
+                    data: JSON.stringify(selectedIds),
+                    success: function(response) {
+                        alert('删除成功');
+                        location.reload();
+                    },
+                    error: function(xhr, status, error) {
+                        alert('删除失败');
+                    }
+                });
+            } else {
+                alert('已取消');
+            }
+            $('.employee-checkbox:checked').prop('checked', false).trigger('change');
+        });
+
+        $(document).on('click', '#send-mail-to-employees-btn', function() {
+            var mailSubject = $('#employee-mail-subject').val();
+            var mailBody = $('#employee-mail-body').val();
+            var mailAccount = $('#email-account').val();
+            var mailPassword = $('#email-password').val();
+            var selectedEmails = $('.employee-checkbox:checked').map(function() {
+                return $(this).data('email');
+            }).get();
+
+            alert('发送邮件给员工:\n主题: ' + mailSubject + '\n内容: ' + mailBody + '\n帐号: ' + mailAccount + '\n密码: ' + mailPassword + '\n收件人邮箱: ' + selectedEmails);
+
+            var emailDetails = {
+                emails: selectedEmails,
+                subject: mailSubject,
+                content: mailBody,
+                account: mailAccount,
+                password: mailPassword
+            };
+
+            $.ajax({
+                url: '/api/employees/sendEmails',
+                type: 'POST',
+                contentType: 'application/json',
+                data: JSON.stringify(emailDetails),
+                success: function(data) {
+                    console.log(data);
+                    alert('邮件发送成功！');
+                },
+                error: function(xhr, status, error) {
+                    console.error(error);
+                    alert('邮件发送失败！');
+                }
+            });
+        });
+    });
+</script>
+
+</body>
+</html>

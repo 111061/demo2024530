@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>信箱管理系統 - 合作夥伴列表</title>
+    <link rel="stylesheet" href="css/bootstrap.min.css">
+    <style>
+        .sidebar {
+            min-height: 100vh;
+        }
+        .operation-buttons {
+            display: flex;
+            justify-content: space-around;
+        }
+        .btn-lg {
+            font-size: 1.25rem;
+            padding: .5rem 1rem;
+        }
+        .table th, .table td {
+            font-size: 1.2rem;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container-fluid">
+    <div class="row">
+        <nav class="col-md-2 d-md-block bg-dark sidebar">
+            <div class="sidebar-sticky">
+                <ul class="nav flex-column">
+                    <li class="nav-item">
+                        <a class="nav-link text-white" href="employees.html" id="nav-employees">員工列表</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active text-white" href="partners.html" id="nav-partners">合作夥伴列表</a>
+                    </li>
+                </ul>
+            </div>
+        </nav>
+
+        <main class="col-md-10 ml-sm-auto col-lg-10 pt-3 px-4">
+            <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pb-2 mb-3 border-bottom">
+                <h1 class="h2">信箱管理列表</h1>
+                <div class="email-authentication-form d-flex align-items-center">
+                    <div class="me-2">
+                        <label for="email-account" class="visually-hidden">郵件帳號</label>
+                        <input type="email" class="form-control" id="email-account" placeholder="name@example.com">
+                    </div>
+                    <div class="me-2">
+                        <label for="email-password" class="visually-hidden">密碼</label>
+                        <input type="password" class="form-control" id="email-password" placeholder="Password">
+                    </div>
+                    <button class="btn btn-primary" style="display:none;">登入</button>
+                </div>
+            </div>
+            <div id="content">
+                <!-- 合作夥伴列表內容 -->
+            </div>
+        </main>
+    </div>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
+<script src="js/bootstrap.min.js"></script>
+<script>
+    $(document).ready(function() {
+        function fetchPartners() {
+            $.ajax({
+                url: '/api/partners/test',
+                type: 'GET',
+                dataType: 'json',
+                success: function(partners) {
+                    var partnersContent = '<h2>合作夥伴列表</h2>';
+                    partnersContent += '<div id="add-partner-form" style="margin-bottom: 15px;">';
+                    partnersContent += '<input type="text" id="partner-company" placeholder="公司名称">';
+                    partnersContent += '<input type="text" id="partner-salesRep" placeholder="销售代表">';
+                    partnersContent += '<input type="text" id="partner-mail" placeholder="邮箱">';
+                    partnersContent += '<button id="add-partner-btn" class="btn btn-primary">新增合作夥伴</button>';
+                    partnersContent += '</div>';
+                    partnersContent += '<table class="table">';
+                    partnersContent += '<thead><tr><th><input type="checkbox" id="select-all-partners"></th><th>公司ID</th><th>公司名稱</th><th>銷售代表</th><th>郵箱</th><th>操作</th></tr></thead><tbody>';
+                    $.each(partners, function(index, partner) {
+                        partnersContent += '<tr><td><input type="checkbox" class="partner-checkbox" data-email="' + partner.mail + '"></td><td>' + partner.comId + '</td><td>' + partner.company + '</td><td>' + partner.salesRep + '</td><td>' + partner.mail + '</td>';
+                        partnersContent += '<td class="operation-buttons"><button class="btn btn-info btn-sm">變更</button></td></tr>';
+                    });
+
+                    partnersContent += '</tbody></table>';
+                    partnersContent += '<div id="send-mail-to-partners-form" style="margin-top: 15px;">';
+                    partnersContent += '<h3>發送郵件給合作夥伴</h3>';
+                    partnersContent += '<input type="text" id="partner-mail-subject" placeholder="主題" class="form-control">';
+                    partnersContent += '<textarea id="partner-mail-body" placeholder="內容" class="form-control" rows="4"></textarea>';
+                    partnersContent += '<button id="delete-selected-partners" class="btn btn-danger btn-sm mt-2 me-2" style="display:none;">刪除選定</button>';
+                    partnersContent += '<button id="send-mail-to-partners-btn" class="btn btn-secondary btn-sm mt-2" style="display:none;">發送郵件</button>';
+                    $('#content').html(partnersContent);
+                },
+                error: function(request, status, error) {
+                    $('#content').html('<p>无法加载合作夥伴数据。错误信息：' + request.responseText + '</p>');
+                }
+            });
+        }
+
+        fetchPartners();
+
+        $(document).on('click', '#add-partner-btn', function() {
+            var partnerData = {
+                company: $('#partner-company').val(),
+                salesRep: $('#partner-salesRep').val(),
+                mail: $('#partner-mail').val()
+            };
+            if (!partnerData.company || !partnerData.salesRep || !partnerData.mail) {
+                alert('新增合作夥伴失敗！所有欄位都必須填寫。');
+                return;
+            }
+
+            $.ajax({
+                url: '/api/partners/add',
+                type: 'POST',
+                contentType: 'application/json',
+                data: JSON.stringify(partnerData),
+                success: function(data) {
+                    alert('合作夥伴新增成功！');
+                    fetchPartners();
+                },
+                error: function(error) {
+                    alert('新增合作夥伴失敗！');
+                }
+            });
+        });
+
+        $(document).on('click', '#select-all-partners', function() {
+            $('.partner-checkbox').prop('checked', this.checked).trigger('change');
+        });
+
+        $(document).on('change', '.partner-checkbox', function() {
+            var anyChecked = $('.partner-checkbox:checked').length > 0;
+            $('#delete-selected-partners').toggle(anyChecked);
+            $('#send-mail-to-partners-btn').toggle(anyChecked);
+        });
+
+        $(document).on('click', '#delete-selected-partners', function() {
+            var selectedCheckboxes = $('.partner-checkbox:checked');
+            selectedCheckboxes.each(function() {
+                alert('刪除按鈕成功！');
+            });
+            $('.partner-checkbox:checked').prop('checked', false).trigger('change');
+        });
+
+        $(document).on('click', '#send-mail-to-partners-btn', function() {
+            var mailSubject = $('#partner-mail-subject').val();
+            var mailBody = $('#partner-mail-body').val();
+            var mailAccount = $('#email-account').val();
+            var mailPassword = $('#email-password').val();
+            var selectedEmails = $('.partner-checkbox:checked').map(function() {
+                return $(this).data('email');
+            }).get();
+
+            alert('发送邮件给合作夥伴:\n主题: ' + mailSubject + '\n内容: ' + mailBody + '\n帐号: ' + mailAccount + '\n密码: ' + mailPassword + '\n收件人邮箱: ' + selectedEmails);
+
+            var emailDetails = {
+                emails: selectedEmails,
+                subject: mailSubject,
+                content: mailBody,
+                account: mailAccount,
+                password: mailPassword
+            };
+
+            $.ajax({
+                url: '/api/employees/sendEmails',
+                type: 'POST',
+                contentType: 'application/json',
+                data: JSON.stringify(emailDetails),
+                success: function(data) {
+                    console.log(data);
+                    alert('邮件发送成功！');
+                },
+                error: function(xhr, status, error) {
+                    console.error(error);
+                    alert('邮件发送失败！');
+                }
+            });
+        });
+    });
+</script>
+
+</body>
+</html>
