@@ -77,21 +77,21 @@
     $(document).ready(function() {
         function fetchPartners() {
             $.ajax({
-                url: '/api/partners/test',
+                url: '/api/orders/test',
                 type: 'GET',
                 dataType: 'json',
-                success: function(partners) {
-                    var partnersContent = '<h2>合作夥伴列表</h2>';
+                success: function(orders) {
+                    var partnersContent = '<h2>注文書作成</h2>';
                     partnersContent += '<div id="add-partner-form" style="margin-bottom: 15px;">';
                     partnersContent += '<input type="text" id="partner-company" placeholder="公司名称">';
                     partnersContent += '<input type="text" id="partner-salesRep" placeholder="销售代表">';
                     partnersContent += '<input type="text" id="partner-mail" placeholder="邮箱">';
-                    partnersContent += '<button id="add-partner-btn" class="btn btn-primary">新增合作夥伴</button>';
+                    partnersContent += '<button id="add-partner-btn" class="btn btn-primary">注文情報追加</button>';
                     partnersContent += '</div>';
                     partnersContent += '<table class="table">';
-                    partnersContent += '<thead><tr><th><input type="checkbox" id="select-all-partners"></th><th>公司ID</th><th>公司名稱</th><th>銷售代表</th><th>郵箱</th><th>操作</th></tr></thead><tbody>';
-                    $.each(partners, function(index, partner) {
-                        partnersContent += '<tr><td><input type="checkbox" class="partner-checkbox" data-email="' + partner.mail + '"></td><td>' + partner.comId + '</td><td>' + partner.company + '</td><td>' + partner.salesRep + '</td><td>' + partner.mail + '</td>';
+                    partnersContent += '<thead><tr><th><input type="checkbox" id="select-all-partners"></th><th>下請企業</th><th>エンジニア</th><th>契約会社</th><th>プロジェクト名</th><th>下位営業</th><th>単価</th><th>支払サイト</th><th>積算</th><th>積算下限</th><th>積算下限</th><th>超過単価</th><th>控除単価</th><th>積算時間単位</th><th>日割設定</th><th>入場日</th><th>退場予定日</th></tr></thead><tbody>';
+                    $.each(orders, function(index, order) {
+                        partnersContent += '<tr><td><input type="checkbox" class="order-checkbox" data-email="' + order.id + '"></td><td>' + order.subcontractor + '</td><td>' + order.engineer + '</td><td>' + order.contractingCompany + '</td><td>' + order.projectName + '</td><td>' + order.subcontractorSales + '</td><td>' + order.unitPrice + '</td><td>' + order.paymentTerms + '</td><td>' + order.settlement + '</td><td>' + order.settlementLowerLimit + '</td><td>' + order.settlementUpperLimit + '</td><td>' + order.overtimeUnitPrice + '</td><td>' + order.deductionUnitPrice + '</td><td>' + order.settlementTimeUnit + '</td><td>' + order.dailyRateSetting + '</td><td>' + order.entryDate + '</td><td>' + order.expectedExitDate + '</td>';
                         partnersContent += '<td class="operation-buttons"><button class="btn btn-info btn-sm">變更</button></td></tr>';
                     });
 
