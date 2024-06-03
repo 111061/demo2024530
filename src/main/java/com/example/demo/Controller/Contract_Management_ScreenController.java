@@ -74,6 +74,24 @@ public class Contract_Management_ScreenController {
         }
     }
 
+    // 搜索契约
+    @GetMapping("/search")
+    public ResponseEntity<List<Contract_Management_Screen>> searchContracts(
+            @RequestParam(required = false) String contractingCompany,
+            @RequestParam(required = false) String ourPosition,
+            @RequestParam(required = false) String contractType,
+            @RequestParam(required = false) String keyword) {
+        try {
+            List<Contract_Management_Screen> contracts = contractService.searchContracts(contractingCompany, ourPosition, contractType, keyword);
+            if (contracts.isEmpty()) {
+                return ResponseEntity.noContent().build();
+            }
+            return ResponseEntity.ok(contracts);
+        } catch (Exception e) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+    }
+
     // 群发邮件
     @PostMapping("/sendEmails")
     public ResponseEntity<String> sendEmailsToContracts(@RequestBody EmailDetails details) {
@@ -94,3 +112,4 @@ public class Contract_Management_ScreenController {
         }
     }
 }
+

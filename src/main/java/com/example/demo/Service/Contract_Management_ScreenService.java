@@ -42,5 +42,13 @@ public class Contract_Management_ScreenService {
         contractRepository.deleteById(id);
     }
 
+    public List<Contract_Management_Screen> searchContracts(String contractingCompany, String ourPosition, String contractType, String keyword) {
+        if ("ALL".equals(contractingCompany)) contractingCompany = null;
+        if ("ALL".equals(ourPosition)) ourPosition = null;
+        if ("ALL".equals(contractType)) contractType = null;
+
+        return contractRepository.searchContracts(contractingCompany, ourPosition, contractType, keyword);
+    }
+
     // 其他查詢方法...
 }
