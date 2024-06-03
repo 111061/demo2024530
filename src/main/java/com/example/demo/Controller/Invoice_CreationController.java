@@ -1,30 +1,28 @@
 package com.example.demo.Controller;
+
 import com.example.demo.DTO.EmailDetails;
-import com.example.demo.DTO.Employee;
-import com.example.demo.DTO.Partner;
 import com.example.demo.DTO.Invoice_Creation;
+import com.example.demo.Service.EmailService;
 import com.example.demo.Service.Invoice_CreationService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
 import java.util.List;
-import org.springframework.http.HttpStatus;
-import com.example.demo.Service.EmailService;
-import com.example.demo.DTO.EmailDetails;
-
-
 
 @RestController
-@RequestMapping("/api/invoice_creation")
+@RequestMapping("/api/invoice_creations")
 public class Invoice_CreationController {
+
     private final Invoice_CreationService invoiceCreationService;
+    private final EmailService emailService;
 
     @Autowired
-    public Invoice_CreationController(Invoice_CreationService invoiceCreationService) {
+    public Invoice_CreationController(Invoice_CreationService invoiceCreationService, EmailService emailService) {
         this.invoiceCreationService = invoiceCreationService;
+        this.emailService = emailService;
     }
-    @Autowired
-    private EmailService emailService;
 
     @GetMapping("/test")
     public ResponseEntity<List<Invoice_Creation>> getAllInvoiceCreation() {
@@ -39,6 +37,7 @@ public class Invoice_CreationController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build(); // 返回500 Internal Server Error状态
         }
     }
+
     @PostMapping("/add")
     public ResponseEntity<Invoice_Creation> addPartner(@RequestBody Invoice_Creation invoiceCreation) {
         try {
@@ -64,6 +63,7 @@ public class Invoice_CreationController {
         }
 
     }
+
     @PostMapping("/sendEmails")
     public ResponseEntity<?> sendEmailsToInvoiceCreate(@RequestBody EmailDetails details) {
         try {
@@ -83,5 +83,4 @@ public class Invoice_CreationController {
             return new ResponseEntity<>("Error sending emails", HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
-
 }
