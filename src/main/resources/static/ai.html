@@ -1,0 +1,58 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>文件上传和摘要显示</title>
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/css/bootstrap.min.css">
+</head>
+<body>
+<div class="container mt-5">
+    <h1 class="mb-4">文件上传和摘要显示</h1>
+    <div class="form-group">
+        <label for="fileInput">选择文件</label>
+        <input type="file" class="form-control-file" id="fileInput">
+    </div>
+    <button id="uploadBtn" class="btn btn-primary">上传文件</button>
+
+    <div class="mt-4" id="summaryContainer" style="display: none;">
+        <h2>文件摘要</h2>
+        <p id="summaryText"></p>
+    </div>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://stackpath.bootstrapcdn.com/bootstrap/4.3.1/js/bootstrap.min.js"></script>
+<script>
+    $(document).ready(function() {
+        $('#uploadBtn').on('click', function() {
+            var fileInput = $('#fileInput')[0];
+            if (fileInput.files.length === 0) {
+                alert('请先选择一个文件');
+                return;
+            }
+
+            var file = fileInput.files[0];
+            var formData = new FormData();
+            formData.append('file', file);
+
+            $.ajax({
+                url: '/upload',
+                type: 'POST',
+                data: formData,
+                processData: false,
+                contentType: false,
+                success: function(response) {
+                    $('#summaryText').text(response);
+                    $('#summaryContainer').show();
+                },
+                error: function(xhr, status, error) {
+                    console.error('文件上传失败:', xhr.responseText);
+                    alert('文件上传失败，请稍后再试。错误信息: ' + xhr.responseText);
+                }
+            });
+        });
+    });
+</script>
+</body>
+</html>

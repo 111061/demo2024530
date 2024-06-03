@@ -28,6 +28,4 @@ public class Invoice_CreationService {
     public void deleteInvoiceCreateById(Long id) {
         invoiceCreationRepository.deleteById(id);
     }
-
-    // 其他查询方法...
 }

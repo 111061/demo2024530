@@ -12,7 +12,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 
 @RestController
-@RequestMapping("/api/invoice_creations")
+@RequestMapping("/api/invoicecreation")
 public class Invoice_CreationController {
 
     private final Invoice_CreationService invoiceCreationService;
@@ -29,58 +29,50 @@ public class Invoice_CreationController {
         try {
             List<Invoice_Creation> invoiceCreations = invoiceCreationService.findAllInvoiceCreation();
             if (invoiceCreations.isEmpty()) {
-                return ResponseEntity.noContent().build(); // 返回204 No Content状态
+                return ResponseEntity.noContent().build();
             }
             return ResponseEntity.ok(invoiceCreations);
         } catch (Exception e) {
-            // 日志记录异常信息
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build(); // 返回500 Internal Server Error状态
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
 
     @PostMapping("/add")
-    public ResponseEntity<Invoice_Creation> addPartner(@RequestBody Invoice_Creation invoiceCreation) {
+    public ResponseEntity<Invoice_Creation> addInvoiceCreation(@RequestBody Invoice_Creation invoiceCreation) {
         try {
             Invoice_Creation savedInvoiceCreation = invoiceCreationService.addInvoiceCreation(invoiceCreation);
             return new ResponseEntity<>(savedInvoiceCreation, HttpStatus.CREATED);
         } catch (Exception e) {
-            e.printStackTrace(); // 输出错误信息到控制台
+            e.printStackTrace();
             return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 
     @DeleteMapping("/delete")
-    public ResponseEntity<List<Invoice_Creation>> deleteInvoiceCreate(@RequestBody List<Long> invoiceCreateIds){
+    public ResponseEntity<Void> deleteInvoiceCreate(@RequestBody List<Long> invoiceCreateIds) {
         try {
             for (Long invoiceCreateId : invoiceCreateIds) {
                 invoiceCreationService.deleteInvoiceCreateById(invoiceCreateId);
             }
             return new ResponseEntity<>(HttpStatus.OK);
-
         } catch (Exception e) {
-            // 日志记录异常信息
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
-
     }
 
     @PostMapping("/sendEmails")
-    public ResponseEntity<?> sendEmailsToInvoiceCreate(@RequestBody EmailDetails details) {
+    public ResponseEntity<String> sendEmailsToInvoiceCreate(@RequestBody EmailDetails details) {
         try {
-            // 获取邮件详情
             String subject = details.getSubject();
             String content = details.getContent();
             String account = details.getAccount();
             String password = details.getPassword();
-
-            // 发送邮件到所有收件人
             emailService.sendEmail(details.getEmails(), subject, content, account, password);
-
             return new ResponseEntity<>("Emails sent successfully!", HttpStatus.OK);
-
         } catch (Exception e) {
-            e.printStackTrace(); // 增加错误输出
+            e.printStackTrace();
             return new ResponseEntity<>("Error sending emails", HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
 }
+
