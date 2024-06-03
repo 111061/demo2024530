@@ -4,7 +4,6 @@ import com.example.demo.DTO.Contract_Management_Screen;
 import com.example.demo.DTO.Contract_Management_ScreenRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
-
 import java.util.List;
 
 @Service
@@ -34,7 +33,6 @@ public class Contract_Management_ScreenService {
     }
 
     public Contract_Management_Screen addContract(Contract_Management_Screen contract) {
-        // 處理新增契約的邏輯
         return contractRepository.save(contract);
     }
 
@@ -46,9 +44,10 @@ public class Contract_Management_ScreenService {
         if ("ALL".equals(contractingCompany)) contractingCompany = null;
         if ("ALL".equals(ourPosition)) ourPosition = null;
         if ("ALL".equals(contractType)) contractType = null;
+        if (keyword != null && keyword.trim().isEmpty()) keyword = null;
 
         return contractRepository.searchContracts(contractingCompany, ourPosition, contractType, keyword);
     }
-
-    // 其他查詢方法...
 }
+
+
