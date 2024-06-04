@@ -20,6 +20,18 @@
         .table th, .table td {
             font-size: 1.2rem;
         }
+        .form-row {
+            display: flex;
+            flex-wrap: nowrap;
+            align-items: center;
+        }
+        .form-row > * {
+            flex: 1;
+            margin-right: 10px;
+        }
+        .form-row > *:last-child {
+            margin-right: 0;
+        }
     </style>
 </head>
 <body>
@@ -97,15 +109,26 @@ $(document).ready(function() {
             success: function(contracts) {
                 var contractsContent = '<h2>契約管理列表</h2>';
                 contractsContent += '<div id="add-contract-form" style="margin-bottom: 15px;">';
-                contractsContent += '<input type="text" id="contract-contractingCompany" placeholder="契約名義公司">';
-                contractsContent += '<input type="text" id="contract-contractedCompany" placeholder="契約相手公司">';
-                contractsContent += '<input type="text" id="contract-contractType" placeholder="契約種類">';
-                contractsContent += '<input type="text" id="contract-ourPosition" placeholder="自社立場">';
-                contractsContent += '<input type="text" id="contract-ourSalesRepresentative" placeholder="成約營業">';
-                contractsContent += '<input type="text" id="contract-theirSalesRepresentative" placeholder="相手營業">';
-                contractsContent += '<input type="date" id="contract-contractDate" placeholder="成功日付">';
-                contractsContent += '<input type="text" id="contract-quotation" placeholder="見積書">';
+                contractsContent += '<div class="form-row">';
+                contractsContent += '<input type="text" id="contract-contractingCompany" placeholder="契約名義公司" class="form-control">';
+                contractsContent += '<input type="text" id="contract-contractedCompany" placeholder="契約相手公司" class="form-control">';
+                contractsContent += '<select id="contract-contractType" class="form-control">';
+                contractsContent += '<option value="派遣契約">派遣契約</option>';
+                contractsContent += '<option value="委任契約">委任契約</option>';
+                contractsContent += '<option value="SES.準委任">SES.準委任</option>';
+                contractsContent += '</select>';
+                contractsContent += '<select id="contract-ourPosition" class="form-control">';
+                contractsContent += '<option value="上位">上位</option>';
+                contractsContent += '<option value="下位">下位</option>';
+                contractsContent += '</select>';
+                contractsContent += '</div>';
+                contractsContent += '<div class="form-row">';
+                contractsContent += '<input type="text" id="contract-ourSalesRepresentative" placeholder="成約營業" class="form-control">';
+                contractsContent += '<input type="text" id="contract-theirSalesRepresentative" placeholder="相手營業" class="form-control">';
+                contractsContent += '<input type="date" id="contract-contractDate" placeholder="成功日付" class="form-control">';
+                contractsContent += '<input type="text" id="contract-quotation" placeholder="見積書" class="form-control">';
                 contractsContent += '<button id="add-contract-btn" class="btn btn-primary">新增契約</button>';
+                contractsContent += '</div>';
                 contractsContent += '</div>';
                 contractsContent += '<table class="table">';
                 contractsContent += '<thead><tr><th><input type="checkbox" id="select-all-contracts"></th><th>契約編號</th><th>契約名義公司</th><th>契約相手公司</th><th>契約種類</th><th>自社立場</th><th>成約營業</th><th>相手營業</th><th>成功日付</th><th>見積書</th><th>操作</th></tr></thead><tbody>';
@@ -279,4 +302,5 @@ $(document).ready(function() {
 
 </body>
 </html>
+
 
