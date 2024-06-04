@@ -1,4 +1,5 @@
 package com.example.demo.DTO;
+
 import java.time.LocalDate;
 import jakarta.persistence.*;
 
@@ -7,7 +8,7 @@ import jakarta.persistence.*;
 public class Contract_Management_Screen {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Integer contractCode;
+    private Long contractCode;
 
     private String contractingCompany;
     private String contractedCompany;
@@ -19,11 +20,11 @@ public class Contract_Management_Screen {
     private String quotation;
 
     // Getters and setters
-    public Integer getContractCode() {
+    public Long getContractCode() {
         return contractCode;
     }
 
-    public void setContractCode(Integer contractCode) {
+    public void setContractCode(Long contractCode) {
         this.contractCode = contractCode;
     }
 
@@ -94,7 +95,7 @@ public class Contract_Management_Screen {
     // toString method for debugging purposes
     @Override
     public String toString() {
-        return "ContractManagementScreen{" +
+        return "Contract_Management_Screen{" +
                 "contractCode=" + contractCode +
                 ", contractingCompany='" + contractingCompany + '\'' +
                 ", contractedCompany='" + contractedCompany + '\'' +
@@ -107,3 +108,4 @@ public class Contract_Management_Screen {
                 '}';
     }
 }
+
