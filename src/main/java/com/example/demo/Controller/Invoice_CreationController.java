@@ -39,7 +39,7 @@ public class Invoice_CreationController {
         }
     }
 
-    // 根据名义公司查询契约
+    // 根据名义公司查询請求書
     @GetMapping("/test/parentCompany/{parentCompany}")
     public ResponseEntity<List<Invoice_Creation>> getInvoice_CreationByparentCompany(@PathVariable String parentCompany) {
         try {

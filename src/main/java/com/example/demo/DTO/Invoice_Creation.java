@@ -14,7 +14,7 @@ public class Invoice_Creation {
     private String parentCompany;
     private String orderNumber;
     private String engineer;
-    private LocalTime workTime;
+    private Double workTime;
     private String projectName;
     private String parentSales;
     private Double unitPrice;
@@ -62,11 +62,11 @@ public class Invoice_Creation {
         this.engineer = engineer;
     }
 
-    public LocalTime getWorkTime() {
+    public Double getWorkTime() {
         return workTime;
     }
 
-    public void setWorkTime(LocalTime workTime) {
+    public void setWorkTime(Double workTime) {
         this.workTime = workTime;
     }
 
