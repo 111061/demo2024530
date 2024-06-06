@@ -10,11 +10,17 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import java.util.List;
 
 @RestController
 @RequestMapping("/api/invoicecreation")
 public class Invoice_CreationController {
+
+    private static final Logger logger = LoggerFactory.getLogger(Invoice_CreationController.class);
+
 
     private final Invoice_CreationService invoiceCreationService;
     private final EmailService emailService;
@@ -23,6 +29,22 @@ public class Invoice_CreationController {
     public Invoice_CreationController(Invoice_CreationService invoiceCreationService, EmailService emailService) {
         this.invoiceCreationService = invoiceCreationService;
         this.emailService = emailService;
+    }
+
+
+
+
+    @PostMapping("/calculate_settlement/{id}")
+    public ResponseEntity<Double> calculateSettlement(@PathVariable Long id) {
+        logger.info("Received request to calculate settlement for invoice creation with id: {}", id);
+        try {
+            double settlement = invoiceCreationService.calculateSettlement(id);
+            logger.info("Calculated settlement value: {}", settlement);
+            return ResponseEntity.ok(settlement);
+        } catch (Exception e) {
+            logger.error("Error calculating settlement: ", e);
+            return ResponseEntity.status(500).body(null);
+        }
     }
 
     @GetMapping("/test")
