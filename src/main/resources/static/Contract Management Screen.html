@@ -138,8 +138,8 @@ $(document).ready(function() {
                 var contractTypes = new Set();
                 
                 $.each(contracts, function(index, contract) {
-                    contractsContent += '<tr><td><input type="checkbox" class="contract-checkbox" data-email="' + contract.quotation + '"></td><td>' + contract.contractCode + '</td><td>' + contract.contractingCompany + '</td><td>' + contract.contractedCompany + '</td><td>' + contract.contractType + '</td><td>' + contract.ourPosition + '</td><td>' + contract.ourSalesRepresentative + '</td><td>' + contract.theirSalesRepresentative + '</td><td>' + contract.contractDate + '</td><td>' + contract.quotation + '</td>';
-                    contractsContent += '<td class="operation-buttons"><button class="btn btn-info btn-sm">變更</button></td></tr>';
+                    contractsContent += '<tr data-id="' + contract.contractCode + '"><td><input type="checkbox" class="contract-checkbox" data-email="' + contract.quotation + '"></td><td>' + contract.contractCode + '</td><td>' + contract.contractingCompany + '</td><td>' + contract.contractedCompany + '</td><td>' + contract.contractType + '</td><td>' + contract.ourPosition + '</td><td>' + contract.ourSalesRepresentative + '</td><td>' + contract.theirSalesRepresentative + '</td><td>' + contract.contractDate + '</td><td>' + contract.quotation + '</td>';
+                    contractsContent += '<td class="operation-buttons"><button class="btn btn-info btn-sm edit-contract">變更</button></td></tr>';
                     
                     contractingCompanies.add(contract.contractingCompany);
                     ourPositions.add(contract.ourPosition);
@@ -297,10 +297,65 @@ $(document).ready(function() {
             }
         });
     });
+
+    $(document).on('click', '.edit-contract', function() {
+        var row = $(this).closest('tr');
+        var contractId = row.data('id');
+        var contractingCompany = row.find('td:eq(2)').text();
+        var contractedCompany = row.find('td:eq(3)').text();
+        var contractType = row.find('td:eq(4)').text();
+        var ourPosition = row.find('td:eq(5)').text();
+        var ourSalesRepresentative = row.find('td:eq(6)').text();
+        var theirSalesRepresentative = row.find('td:eq(7)').text();
+        var contractDate = row.find('td:eq(8)').text();
+        var quotation = row.find('td:eq(9)').text();
+
+        // Convert row to editable fields
+        row.find('td:eq(2)').html('<input type="text" class="form-control" value="' + contractingCompany + '">');
+        row.find('td:eq(3)').html('<input type="text" class="form-control" value="' + contractedCompany + '">');
+        row.find('td:eq(4)').html('<select class="form-control"><option value="派遣契約">派遣契約</option><option value="委任契約">委任契約</option><option value="SES.準委任">SES.準委任</option></select>');
+        row.find('td:eq(5)').html('<select class="form-control"><option value="上位">上位</option><option value="下位">下位</option></select>');
+        row.find('td:eq(6)').html('<input type="text" class="form-control" value="' + ourSalesRepresentative + '">');
+        row.find('td:eq(7)').html('<input type="text" class="form-control" value="' + theirSalesRepresentative + '">');
+        row.find('td:eq(8)').html('<input type="date" class="form-control" value="' + contractDate + '">');
+        row.find('td:eq(9)').html('<input type="text" class="form-control" value="' + quotation + '">');
+        row.find('td:eq(4) select').val(contractType);
+        row.find('td:eq(5) select').val(ourPosition);
+
+        // Change button to save button
+        $(this).removeClass('edit-contract').addClass('save-contract').text('保存');
+    });
+
+    $(document).on('click', '.save-contract', function() {
+        var row = $(this).closest('tr');
+        var contractId = row.data('id');
+        var contractData = {
+            contractingCompany: row.find('td:eq(2) input').val(),
+            contractedCompany: row.find('td:eq(3) input').val(),
+            contractType: row.find('td:eq(4) select').val(),
+            ourPosition: row.find('td:eq(5) select').val(),
+            ourSalesRepresentative: row.find('td:eq(6) input').val(),
+            theirSalesRepresentative: row.find('td:eq(7) input').val(),
+            contractDate: row.find('td:eq(8) input').val(),
+            quotation: row.find('td:eq(9) input').val()
+        };
+
+        $.ajax({
+            url: '/api/contracts/update/' + contractId,
+            type: 'PUT',
+            contentType: 'application/json',
+            data: JSON.stringify(contractData),
+            success: function(data) {
+                alert('契約更新成功！');
+                fetchContracts();
+            },
+            error: function(error) {
+                alert('契約更新失敗！');
+            }
+        });
+    });
 });
 </script>
 
 </body>
 </html>
-
-

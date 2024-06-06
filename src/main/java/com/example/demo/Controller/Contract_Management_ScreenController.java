@@ -91,6 +91,30 @@ public class Contract_Management_ScreenController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
+    // 添加一個更新契約的API
+    @PutMapping("/update/{id}")
+    public ResponseEntity<Contract_Management_Screen> updateContract(@PathVariable Long id, @RequestBody Contract_Management_Screen contract) {
+        try {
+            Contract_Management_Screen existingContract = contractService.findContractById(id);
+            if (existingContract == null) {
+                return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+            }
+            // 更新契約資料
+            existingContract.setContractingCompany(contract.getContractingCompany());
+            existingContract.setContractedCompany(contract.getContractedCompany());
+            existingContract.setContractType(contract.getContractType());
+            existingContract.setOurPosition(contract.getOurPosition());
+            existingContract.setOurSalesRepresentative(contract.getOurSalesRepresentative());
+            existingContract.setTheirSalesRepresentative(contract.getTheirSalesRepresentative());
+            existingContract.setContractDate(contract.getContractDate());
+            existingContract.setQuotation(contract.getQuotation());
+
+            Contract_Management_Screen updatedContract = contractService.addContract(existingContract);
+            return new ResponseEntity<>(updatedContract, HttpStatus.OK);
+        } catch (Exception e) {
+            return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
 
     // 群发邮件
     @PostMapping("/sendEmails")
