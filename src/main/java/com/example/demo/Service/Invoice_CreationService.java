@@ -20,9 +20,10 @@ public class Invoice_CreationService {
         this.invoiceCreationRepository = invoiceCreationRepository;
     }
 
-    public double calculateSettlement(Long id){
+    public double calculateSettlement(Long id) {
         Invoice_Creation invoiceCreation = invoiceCreationRepository.findById(id)
                 .orElseThrow(() -> new ResourceNotFoundException("Invoice_Creation not found for this id :: " + id));
+
         double workTime = invoiceCreation.getWorkTime();
         double settlementLowerLimit = invoiceCreation.getSettlementLowerLimit();
         double settlementUpperLimit = invoiceCreation.getSettlementUpperLimit();
@@ -32,13 +33,14 @@ public class Invoice_CreationService {
         // 计算公式
         double settlementAmount = 0.0;
         if (workTime < settlementLowerLimit) {
-            settlementAmount = (workTime-settlementLowerLimit)*deductionUnitPriceTotal;
+            settlementAmount = (settlementLowerLimit - workTime) * deductionUnitPriceTotal;
         } else if (workTime > settlementUpperLimit) {
-            settlementAmount = (settlementUpperLimit-workTime)*overtimeUnitPrice;
+            settlementAmount = (workTime - settlementUpperLimit) * overtimeUnitPrice;
         }
 
         return settlementAmount;
     }
+
 
 
     public List<Invoice_Creation> findAllInvoiceCreation() {

@@ -2,7 +2,6 @@ package com.example.demo.DTO;
 
 import jakarta.persistence.*;
 import java.time.LocalDate;
-import java.time.LocalTime;
 
 @Entity
 @Table(name = "invoicecreation")
@@ -199,4 +198,3 @@ public class Invoice_Creation {
                 '}';
     }
 }
-
