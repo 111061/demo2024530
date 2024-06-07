@@ -31,14 +31,14 @@ public class Invoice_CreationService {
         double deductionUnitPriceTotal = invoiceCreation.getDeductionUnitPriceTotal();
 
         // 计算公式
-        double settlementAmount = 0.0;
+        double settlementValue = 0.0;
         if (workTime < settlementLowerLimit) {
-            settlementAmount = (settlementLowerLimit - workTime) * deductionUnitPriceTotal;
+            settlementValue = (settlementLowerLimit - workTime) * deductionUnitPriceTotal;
         } else if (workTime > settlementUpperLimit) {
-            settlementAmount = (workTime - settlementUpperLimit) * overtimeUnitPrice;
+            settlementValue = (workTime - settlementUpperLimit) * overtimeUnitPrice;
         }
 
-        return settlementAmount;
+        return settlementValue;
     }
 
 
@@ -49,6 +49,10 @@ public class Invoice_CreationService {
 
     public List<Invoice_Creation> findByparentCompany(String parentCompany) {
         return invoiceCreationRepository.findByparentCompany(parentCompany);
+    }
+
+    public Invoice_Creation findInvoiceCreationById(Long id) {
+        return invoiceCreationRepository.findById(id).orElse(null);
     }
 
     public List<Invoice_Creation> findByorderNumber(String orderNumber) {
