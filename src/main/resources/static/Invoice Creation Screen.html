@@ -174,7 +174,7 @@
                         var id = $(this).data('id');
                         console.log('Calculating settlement for ID: ' + id);
                         $.ajax({
-                            url: '/invoice_creation/calculate_settlement/' + id,
+                            url: '/api/invoicecreation/calculate_settlement/' + id,
                             type: 'POST',
                             contentType: 'application/json',
                             success: function(responseData) {  // 确保此处的参数名不与外部定义冲突

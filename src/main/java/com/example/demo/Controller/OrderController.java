@@ -1,5 +1,6 @@
 package com.example.demo.Controller;
 
+import com.example.demo.DTO.Contract_Management_Screen;
 import com.example.demo.DTO.EmailDetails;
 import com.example.demo.DTO.Order;
 import com.example.demo.DTO.Partner;
@@ -65,6 +66,45 @@ public class OrderController {
         }
 
     }
+
+    // 添加一個更新注文書的API
+    @PutMapping("/update/{id}")
+    public ResponseEntity<Order> updateOrder(@PathVariable Long id, @RequestBody Order order) {
+        try {
+            Order existingOrder = orderService.findOrderById(id);
+            if (existingOrder == null) {
+                return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+            }
+            // 更新契約資料
+            existingOrder.setSubcontractor(order.getSubcontractor());
+            existingOrder.setEngineer(order.getEngineer());
+            existingOrder.setContractingCompany(order.getContractingCompany());
+            existingOrder.setProjectName(order.getProjectName());
+            existingOrder.setSubcontractorSales(order.getSubcontractorSales());
+            existingOrder.setUnitPrice(order.getUnitPrice());
+            existingOrder.setPaymentTerms(order.getPaymentTerms());
+            existingOrder.setSettlement(order.getSettlement());
+            existingOrder.setSettlementLowerLimit(order.getSettlementLowerLimit());
+            existingOrder.setSettlementUpperLimit(order.getSettlementUpperLimit());
+            existingOrder.setOvertimeUnitPrice(order.getOvertimeUnitPrice());
+            existingOrder.setDeductionUnitPrice(order.getDeductionUnitPrice());
+            existingOrder.setSettlementTimeUnit(order.getSettlementTimeUnit());
+            existingOrder.setDailyRateSetting(order.getDailyRateSetting());
+            existingOrder.setEntryDate(order.getEntryDate());
+            existingOrder.setExpectedExitDate(order.getExpectedExitDate());
+
+
+
+
+            Order updatedOrder = orderService.addOrder(existingOrder);
+            return new ResponseEntity<>(updatedOrder, HttpStatus.OK);
+        } catch (Exception e) {
+            return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
+
+
     @PostMapping("/sendEmails")
     public ResponseEntity<?> sendEmailsToPartner(@RequestBody EmailDetails details) {
         try {
