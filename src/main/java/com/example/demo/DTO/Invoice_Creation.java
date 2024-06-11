@@ -32,6 +32,9 @@ public class Invoice_Creation {
     @Transient
     private double settlementValue;
     // Getters and setters
+
+
+
     public Long getId() {
         return id;
     }

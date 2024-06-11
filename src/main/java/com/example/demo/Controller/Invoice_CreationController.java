@@ -1,5 +1,6 @@
 package com.example.demo.Controller;
 
+import org.springframework.core.io.InputStreamResource;
 import com.example.demo.DTO.Contract_Management_Screen;
 import com.example.demo.DTO.EmailDetails;
 import com.example.demo.DTO.Invoice_Creation;
@@ -8,7 +9,13 @@ import com.example.demo.Service.Invoice_CreationService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.HttpHeaders;
+
 import org.springframework.web.bind.annotation.*;
+
+import java.io.ByteArrayInputStream;
+
+
 
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -29,6 +36,22 @@ public class Invoice_CreationController {
         this.invoiceCreationService = invoiceCreationService;
         this.emailService = emailService;
     }
+
+    @GetMapping("/export")
+    @ResponseBody
+    public ResponseEntity<InputStreamResource> exportInvoices() {
+        ByteArrayInputStream in = invoiceCreationService.exportInvoicesToExcel();
+
+        HttpHeaders headers = new HttpHeaders();
+        headers.add("Content-Disposition", "attachment; filename=invoices.xlsx");
+
+        return ResponseEntity
+                .ok()
+                .headers(headers)
+                .body(new InputStreamResource(in));
+    }
+
+
 
     @PostMapping("/calculate_settlement/{id}")
     public ResponseEntity<Double> calculateSettlement(@PathVariable Long id) {
