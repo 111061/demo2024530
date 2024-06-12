@@ -6,12 +6,14 @@ import com.example.demo.DTO.Invoice_CreationRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import java.io.IOException;
-
+import java.io.FileOutputStream;
+import java.io.FileInputStream;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
 import java.io.OutputStreamWriter;
-
-
+import java.lang.*;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
@@ -21,7 +23,56 @@ import java.util.List;
 @Service
 public class Invoice_CreationService {
 
-    private final Invoice_CreationRepository invoiceCreationRepository;
+    private static final Logger logger = LoggerFactory.getLogger(Invoice_CreationService.class);
+
+    @Autowired
+    private Invoice_CreationRepository invoiceCreationRepository;
+
+    public byte[] exportInvoiceById(Long id) {
+        ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+        try {
+            Invoice_Creation invoiceCreation = invoiceCreationRepository.findById(id)
+                    .orElseThrow(() -> new RuntimeException("Invoice not found"));
+
+            // Calculate and update settlement value
+            double settlementValue = calculateSettlement(id);
+            invoiceCreation.setSettlementValue(settlementValue);
+            double unit_price = invoiceCreation.getUnitPrice();
+            double total = settlementValue+unit_price;
+
+
+            String templateFilePath = "C:\\Users\\rober\\IdeaProjects\\demo20240603\\請求書テンプレート.xlsx";
+            FileInputStream fis = new FileInputStream(templateFilePath);
+            Workbook workbook = new XSSFWorkbook(fis);
+            Sheet sheet = workbook.getSheetAt(0);
+
+            // Update specific cells with invoiceCreation data
+            Row row = sheet.getRow(22);
+            row.getCell(1).setCellValue(invoiceCreation.getOrderNumber()); // B23
+            row.getCell(2).setCellValue(invoiceCreation.getEngineer()); // C23
+            row.getCell(3).setCellValue(invoiceCreation.getProjectName()); // D23
+            row.getCell(5).setCellValue(invoiceCreation.getUnitPrice()); // F23
+            row.getCell(6).setCellValue(invoiceCreation.getSettlementUpperLimit()); // G23
+            row.getCell(7).setCellValue(invoiceCreation.getSettlementLowerLimit()); // H23
+            row.getCell(8).setCellValue(invoiceCreation.getDeductionUnitPriceTotal()); // I23
+            row.getCell(9).setCellValue(invoiceCreation.getOvertimeUnitPrice()); // J23
+            row.getCell(10).setCellValue(invoiceCreation.getWorkTime()); // K23
+            row.getCell(11).setCellValue(invoiceCreation.getSettlementValue()); // L23
+            row.getCell(12).setCellValue(total); // M23
+            double check_settlement = invoiceCreation.getSettlementValue();
+            logger.info("Checking settlement value: {}", check_settlement);
+
+
+            // Write changes to the output stream
+            workbook.write(byteArrayOutputStream);
+            workbook.close();
+        } catch (IOException e) {
+            logger.error("Error generating Excel for invoice with ID: " + id, e);
+        }
+        return byteArrayOutputStream.toByteArray();
+    }
+
+
 
     public ByteArrayInputStream exportInvoicesToExcel() {
         List<Invoice_Creation> invoices = invoiceCreationRepository.findAll();
@@ -93,15 +144,21 @@ public class Invoice_CreationService {
         double deductionUnitPriceTotal = invoiceCreation.getDeductionUnitPriceTotal();
 
         // 计算公式
-        double settlementValue = 0.0;
+        logger.info("Calculating settlement value for Invoice ID: {}", id);
+        logger.info("WorkTime: {}, SettlementLowerLimit: {}, SettlementUpperLimit: {}, OvertimeUnitPrice: {}, DeductionUnitPriceTotal: {}",
+                workTime, settlementLowerLimit, settlementUpperLimit, overtimeUnitPrice, deductionUnitPriceTotal);
+
+        double settlementValue = 0;
         if (workTime < settlementLowerLimit) {
             settlementValue = (settlementLowerLimit - workTime) * deductionUnitPriceTotal;
         } else if (workTime > settlementUpperLimit) {
             settlementValue = (workTime - settlementUpperLimit) * overtimeUnitPrice;
         }
 
+        logger.info("Calculated Settlement Value: {}", settlementValue);
         return settlementValue;
     }
+
 
 
 

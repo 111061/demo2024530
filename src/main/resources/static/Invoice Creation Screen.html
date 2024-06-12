@@ -189,6 +189,8 @@
             });
         }
 
+
+
         // 自动加载数据
         fetchInvoiceCreations();
 
@@ -201,6 +203,13 @@
             };
             fetchInvoiceCreations(searchParams);
         });
+
+
+         $(document).on('click', '.export-invoice', function() {
+            var row = $(this).closest('tr');
+            var invoiceCreationId = row.data('id');
+            window.location.href = '/api/invoicecreation/export/' + invoiceCreationId;
+         });
 
         $(document).on('click', '#add-invoice-creation-btn', function() {
             var invoiceCreationData = {
@@ -398,9 +407,7 @@
             });
         });
 
-        $(document).on('click', '.export-invoice', function() {
-            window.location.href = '/api/invoicecreation/export';
-        });
+
     });
 </script>
 

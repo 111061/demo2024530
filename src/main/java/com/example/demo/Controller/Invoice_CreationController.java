@@ -10,8 +10,11 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.HttpHeaders;
-
+import org.springframework.http.MediaType;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.http.ContentDisposition;
+
+
 
 import java.io.ByteArrayInputStream;
 
@@ -28,6 +31,7 @@ public class Invoice_CreationController {
 
     private static final Logger logger = LoggerFactory.getLogger(Invoice_CreationController.class);
 
+    @Autowired
     private final Invoice_CreationService invoiceCreationService;
     private final EmailService emailService;
 
@@ -37,18 +41,20 @@ public class Invoice_CreationController {
         this.emailService = emailService;
     }
 
-    @GetMapping("/export")
-    @ResponseBody
-    public ResponseEntity<InputStreamResource> exportInvoices() {
-        ByteArrayInputStream in = invoiceCreationService.exportInvoicesToExcel();
+    @GetMapping("/export/{id}")
+    public ResponseEntity<?> exportInvoiceCreation(@PathVariable Long id) {
+        try {
+            logger.info("Exporting invoice with ID: " + id);
+            byte[] data = invoiceCreationService.exportInvoiceById(id);
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_OCTET_STREAM);
+            headers.add(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=invoice_" + id + ".xlsx");
 
-        HttpHeaders headers = new HttpHeaders();
-        headers.add("Content-Disposition", "attachment; filename=invoices.xlsx");
-
-        return ResponseEntity
-                .ok()
-                .headers(headers)
-                .body(new InputStreamResource(in));
+            return new ResponseEntity<>(data, headers, HttpStatus.OK);
+        } catch (Exception e) {
+            logger.error("Error exporting invoice with ID: " + id, e);
+            return new ResponseEntity<>(HttpStatus.INTERNAL_SERVER_ERROR);
+        }
     }
 
 
