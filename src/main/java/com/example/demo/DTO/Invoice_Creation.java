@@ -3,6 +3,7 @@ package com.example.demo.DTO;
 import jakarta.persistence.*;
 import java.time.LocalDate;
 
+
 @Entity
 @Table(name = "invoicecreation")
 public class Invoice_Creation {
@@ -28,7 +29,13 @@ public class Invoice_Creation {
     private LocalDate entryDate;
     private LocalDate expectedExitDate;
 
+
+    @Transient
+    private double settlementValue;
     // Getters and setters
+
+
+
     public Long getId() {
         return id;
     }
@@ -36,6 +43,15 @@ public class Invoice_Creation {
     public void setId(Long id) {
         this.id = id;
     }
+
+    public double getSettlementValue() {
+        return settlementValue;
+    }
+
+    public void setSettlementValue(double settlementValue) {
+        this.settlementValue = settlementValue;
+    }
+
 
     public String getParentCompany() {
         return parentCompany;

@@ -75,7 +75,7 @@
                         <label for="email-password" class="visually-hidden">密碼</label>
                         <input type="password" class="form-control" id="email-password" placeholder="Password">
                     </div>
-                    <button class="btn btn-primary">登入</button>
+                    <button class="btn btn-primary" style="display:none;">登入</button>
                 </div>
             </div>
 
@@ -105,6 +105,12 @@
 <script src="js/bootstrap.min.js"></script>
 <script>
     $(document).ready(function() {
+        // Other code...
+
+        $(document).on('click', '#export-invoices-btn', function() {
+            window.location.href = '/api/invoicecreation/export';
+        });
+
         function fetchInvoiceCreations(searchParams = {}) {
             $.ajax({
                 url: '/api/invoicecreation/search',
@@ -112,8 +118,6 @@
                 data: searchParams,
                 dataType: 'json',
                 success: function(invoice_creations) {
-
-                    //生成表格
                     var invoiceCreationsContent = '<h2>請求書列表</h2>';
                     invoiceCreationsContent += '<div id="add-invoice-creation-form" style="margin-bottom: 15px;">';
                     invoiceCreationsContent += '<div class="form-row">';
@@ -126,8 +130,8 @@
                     invoiceCreationsContent += '<input type="text" id="unit-price" placeholder="単価" class="form-control">';
                     invoiceCreationsContent += '<input type="text" id="payment-terms" placeholder="支払サイト" class="form-control">';
                     invoiceCreationsContent += '<input type="text" id="settlement" placeholder="精算" class="form-control">';
-                    invoiceCreationsContent += '<input type="text" id="settlement-lower-limit" placeholder="生産下限" class="form-control">';
-                    invoiceCreationsContent += '<input type="text" id="settlement-upper-limit" placeholder="生産上限" class="form-control">';
+                    invoiceCreationsContent += '<input type="text" id="settlement-lower-limit" placeholder="精算下限" class="form-control">';
+                    invoiceCreationsContent += '<input type="text" id="settlement-upper-limit" placeholder="精算上限" class="form-control">';
                     invoiceCreationsContent += '<input type="text" id="overtime-unit-price" placeholder="超過単価" class="form-control">';
                     invoiceCreationsContent += '<input type="text" id="deduction-unit-price-total" placeholder="控除単価" class="form-control">';
                     invoiceCreationsContent += '<input type="text" id="settlement-time-unit" placeholder="生産時間単位" class="form-control">';
@@ -145,14 +149,12 @@
                     var engineers = new Set();
 
                     $.each(invoice_creations, function(index, invoice_creation) {
-                        invoiceCreationsContent += '<tr><td><input type="checkbox" class="invoice-creation-checkbox" data-email="' + invoice_creation.mail + '"></td><td>' + invoice_creation.id + '</td><td>' + invoice_creation.parentCompany + '</td><td>' + invoice_creation.orderNumber + '</td><td>' + invoice_creation.engineer + '</td><td>' + invoice_creation.workTime + '</td><td>' + invoice_creation.projectName + '</td><td>' + invoice_creation.parentSales + '</td><td>' + invoice_creation.unitPrice + '</td><td>' + invoice_creation.paymentTerms + '</td><td>' + invoice_creation.settlement + '</td><td>' + invoice_creation.settlementLowerLimit + '</td><td>' + invoice_creation.settlementUpperLimit + '</td><td>' + invoice_creation.overtimeUnitPrice + '</td><td>' + invoice_creation.deductionUnitPriceTotal + '</td><td>' + invoice_creation.settlementTimeUnit + '</td><td>' + invoice_creation.dailyRateSetting + '</td><td>' + invoice_creation.entryDate + '</td><td>' + invoice_creation.expectedExitDate + '</td>';
-                        invoiceCreationsContent += '<td class="operation-buttons"><button class="btn btn-info btn-sm">變更</button></td><td><button class="calculate-settlement-btn btn btn-success btn-sm" data-id="' + invoice_creation.id + '">計算精算金額</button></td></tr>';
-
+                        invoiceCreationsContent += '<tr data-id="' + invoice_creation.id + '"><td><input type="checkbox" class="invoice-creation-checkbox" data-email="' + invoice_creation.mail + '"></td><td>' + invoice_creation.id + '</td><td>' + invoice_creation.parentCompany + '</td><td>' + invoice_creation.orderNumber + '</td><td>' + invoice_creation.engineer + '</td><td>' + invoice_creation.workTime + '</td><td>' + invoice_creation.projectName + '</td><td>' + invoice_creation.parentSales + '</td><td>' + invoice_creation.unitPrice + '</td><td>' + invoice_creation.paymentTerms + '</td><td>' + invoice_creation.settlement + '</td><td>' + invoice_creation.settlementLowerLimit + '</td><td>' + invoice_creation.settlementUpperLimit + '</td><td>' + invoice_creation.overtimeUnitPrice + '</td><td>' + invoice_creation.deductionUnitPriceTotal + '</td><td>' + invoice_creation.settlementTimeUnit + '</td><td>' + invoice_creation.dailyRateSetting + '</td><td>' + invoice_creation.entryDate + '</td><td>' + invoice_creation.expectedExitDate + '</td>';
+                        invoiceCreationsContent += '<td class="operation-buttons"><button class="btn btn-info btn-sm edit-invoice-creation">變更</button><button class="btn btn-secondary btn-sm export-invoice">輸出請求書</button></td><td class="settlement-value">' + invoice_creation.settlementValue + '</td></tr>';
 
                         parentCompanies.add(invoice_creation.parentCompany);
                         orderNumbers.add(invoice_creation.orderNumber);
                         engineers.add(invoice_creation.engineer);
-
                     });
 
                     invoiceCreationsContent += '</tbody></table>';
@@ -181,24 +183,6 @@
                         $('#search-engineer').append('<option value="' + type + '">' + type + '</option>');
                     });
 
-                    // 绑定按钮点击事件
-                    $('.calculate-settlement-btn').click(function() {
-                        var id = $(this).data('id');
-                        console.log('Calculating settlement for ID: ' + id);
-                        $.ajax({
-                            url: '/api/invoicecreation/calculate_settlement/' + id,
-                            type: 'POST',
-                            contentType: 'application/json',
-                            success: function(responseData) {
-                                alert('Settlement Value: ' + responseData);
-                            },
-                            error: function(error) {
-                                console.error('Error: ', error);
-                                alert('Calculation failed!');
-                            }
-                        });
-                    });
-
                     $('#delete-selected-invoice-creations, #send-mail-to-invoice-creations-btn').hide();
                     $('#select-all-invoice-creations').prop('checked', false);
                 },
@@ -208,6 +192,9 @@
             });
         }
 
+
+
+        // 自动加载数据
         fetchInvoiceCreations();
 
         $('#search-btn').click(function() {
@@ -219,6 +206,13 @@
             };
             fetchInvoiceCreations(searchParams);
         });
+
+
+         $(document).on('click', '.export-invoice', function() {
+            var row = $(this).closest('tr');
+            var invoiceCreationId = row.data('id');
+            window.location.href = '/api/invoicecreation/export/' + invoiceCreationId;
+         });
 
         $(document).on('click', '#add-invoice-creation-btn', function() {
             var invoiceCreationData = {
@@ -286,7 +280,7 @@
                     data: JSON.stringify(selectedIds),
                     success: function(response) {
                         alert('删除成功');
-                        fetchInvoiceCreations();
+                        location.reload();
                     },
                     error: function(xhr, status, error) {
                         alert('删除失败');
@@ -332,6 +326,91 @@
                 }
             });
         });
+
+        $(document).on('click', '.edit-invoice-creation', function() {
+            var row = $(this).closest('tr');
+            var invoiceCreationId = row.data('id');
+            var parentCompany = row.find('td:eq(2)').text();
+            var orderNumber = row.find('td:eq(3)').text();
+            var engineer = row.find('td:eq(4)').text();
+            var workTime = row.find('td:eq(5)').text();
+            var projectName = row.find('td:eq(6)').text();
+            var parentSales = row.find('td:eq(7)').text();
+            var unitPrice = row.find('td:eq(8)').text();
+            var paymentTerms = row.find('td:eq(9)').text();
+            var settlement = row.find('td:eq(10)').text();
+            var settlementLowerLimit = row.find('td:eq(11)').text();
+            var settlementUpperLimit = row.find('td:eq(12)').text();
+            var overtimeUnitPrice = row.find('td:eq(13)').text();
+            var deductionUnitPriceTotal = row.find('td:eq(14)').text();
+            var settlementTimeUnit = row.find('td:eq(15)').text();
+            var dailyRateSetting = row.find('td:eq(16)').text();
+            var entryDate = row.find('td:eq(17)').text();
+            var expectedExitDate = row.find('td:eq(18)').text();
+
+            // Convert row to editable fields
+            row.find('td:eq(2)').html('<input type="text" class="form-control" value="' + parentCompany + '">');
+            row.find('td:eq(3)').html('<input type="text" class="form-control" value="' + orderNumber + '">');
+            row.find('td:eq(4)').html('<input type="text" class="form-control" value="' + engineer + '">');
+            row.find('td:eq(5)').html('<input type="text" class="form-control" value="' + workTime + '">');
+            row.find('td:eq(6)').html('<input type="text" class="form-control" value="' + projectName + '">');
+            row.find('td:eq(7)').html('<input type="text" class="form-control" value="' + parentSales + '">');
+            row.find('td:eq(8)').html('<input type="text" class="form-control" value="' + unitPrice + '">');
+            row.find('td:eq(9)').html('<input type="text" class="form-control" value="' + paymentTerms + '">');
+            row.find('td:eq(10)').html('<input type="text" class="form-control" value="' + settlement + '">');
+            row.find('td:eq(11)').html('<input type="text" class="form-control" value="' + settlementLowerLimit + '">');
+            row.find('td:eq(12)').html('<input type="text" class="form-control" value="' + settlementUpperLimit + '">');
+            row.find('td:eq(13)').html('<input type="text" class="form-control" value="' + overtimeUnitPrice + '">');
+            row.find('td:eq(14)').html('<input type="text" class="form-control" value="' + deductionUnitPriceTotal + '">');
+            row.find('td:eq(15)').html('<input type="text" class="form-control" value="' + settlementTimeUnit + '">');
+            row.find('td:eq(16)').html('<input type="text" class="form-control" value="' + dailyRateSetting + '">');
+            row.find('td:eq(17)').html('<input type="date" class="form-control" value="' + entryDate + '">');
+            row.find('td:eq(18)').html('<input type="date" class="form-control" value="' + expectedExitDate + '">' );
+
+            // Change button to save button
+            $(this).removeClass('edit-invoice-creation').addClass('save-invoice-creation').text('保存');
+        });
+
+        $(document).on('click', '.save-invoice-creation', function() {
+            var row = $(this).closest('tr');
+            var invoiceCreationId = row.data('id');
+            var invoiceCreationData = {
+                parentCompany: row.find('td:eq(2) input').val(),
+                orderNumber: row.find('td:eq(3) input').val(),
+                engineer: row.find('td:eq(4) input').val(),
+                workTime: row.find('td:eq(5) input').val(),
+                projectName: row.find('td:eq(6) input').val(),
+                parentSales: row.find('td:eq(7) input').val(),
+                unitPrice: row.find('td:eq(8) input').val(),
+                paymentTerms: row.find('td:eq(9) input').val(),
+                settlement: row.find('td:eq(10) input').val(),
+                settlementLowerLimit: row.find('td:eq(11) input').val(),
+                settlementUpperLimit: row.find('td:eq(12) input').val(),
+                overtimeUnitPrice: row.find('td:eq(13) input').val(),
+                deductionUnitPriceTotal: row.find('td:eq(14) input').val(),
+                settlementTimeUnit: row.find('td:eq(15) input').val(),
+                dailyRateSetting: row.find('td:eq(16) input').val(),
+                entryDate: row.find('td:eq(17) input').val(),
+                expectedExitDate: row.find('td:eq(18) input').val()
+            };
+
+            $.ajax({
+                url: '/api/invoicecreation/update/' + invoiceCreationId,
+                type: 'PUT',
+                contentType: 'application/json',
+                data: JSON.stringify(invoiceCreationData),
+                success: function(data) {
+                    alert('請求書更新成功！');
+                    fetchInvoiceCreations();
+                },
+                error: function(error) {
+                    console.error(error);
+                    alert('請求書更新失敗！');
+                }
+            });
+        });
+
+
     });
 </script>
 
