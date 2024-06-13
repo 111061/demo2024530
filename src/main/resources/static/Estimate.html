@@ -1,0 +1,373 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SEC事務管理系統 - 見積書作成</title>
+    <link rel="stylesheet" href="css/bootstrap.min.css">
+    <style>
+        .sidebar {
+            min-height: 100vh;
+        }
+        .operation-buttons {
+            display: flex;
+            justify-content: space-around;
+        }
+        .btn-lg {
+            font-size: 1.25rem;
+            padding: .5rem 1rem;
+        }
+        .table th, .table td {
+            font-size: 1.2rem;
+        }
+        .form-row {
+            display: flex;
+            flex-wrap: nowrap;
+            align-items: center;
+        }
+        .form-row > * {
+            flex: 1;
+            margin-right: 10px;
+        }
+        .form-row > *:last-child {
+            margin-right: 0;
+        }
+    </style>
+</head>
+<body>
+
+<div class="container-fluid">
+    <div class="row">
+        <nav class="col-md-2 d-md-block bg-dark sidebar">
+            <div class="sidebar-sticky">
+                <ul class="nav flex-column">
+                    <li class="nav-item">
+                        <a class="nav-link text-white" href="employees.html" id="nav-employees">員工列表</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active text-white" href="partners.html" id="nav-partners">合作夥伴列表</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active text-white" href="Contract Management Screen.html" id="nav-Contract Management Screen">契約管理</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active text-white" href="Invoice Creation Screen.html" id="nav-Invoice Creation Screen">請求書作成</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active text-white" href="Purchase Order Creation Screen.html" id="nav-Purchase Order Creation Screen">注文書作成</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link active text-white" href="Estimate.html" id="nav-Estimate Creation Screen">見積書作成</a>
+                    </li>
+                </ul>
+            </div>
+        </nav>
+
+        <main class="col-md-10 ml-sm-auto col-lg-10 pt-3 px-4">
+            <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pb-2 mb-3 border-bottom">
+                <h1 class="h2">見積書管理</h1>
+                <div class="email-authentication-form d-flex align-items-center">
+                    <div class="me-2">
+                        <label for="email-account" class="visually-hidden">郵件帳號</label>
+                        <input type="email" class="form-control" id="email-account" placeholder="name@example.com">
+                    </div>
+                    <div class="me-2">
+                        <label for="email-password" class="visually-hidden">密碼</label>
+                        <input type="password" class="form-control" id="email-password" placeholder="Password">
+                    </div>
+                    <button class="btn btn-primary">登入</button>
+                </div>
+            </div>
+
+            <div id="search-form" style="margin-bottom: 15px;">
+                <input type="text" id="search-estimateNumber" placeholder="關鍵字" class="form-control">
+                <button id="search-btn" class="btn btn-primary">搜尋</button>
+            </div>
+
+            <div id="content">
+                <!-- 見積書列表內容 -->
+            </div>
+        </main>
+    </div>
+</div>
+
+<script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
+<script src="js/bootstrap.min.js"></script>
+<script>
+$(document).ready(function() {
+    function fetchEstimates(searchParams = {}) {
+        $.ajax({
+            url: '/api/estimates/search',
+            type: 'GET',
+            data: searchParams,
+            dataType: 'json',
+            success: function(estimates) {
+                var estimatesContent = '<h2>見積書列表</h2>';
+                estimatesContent += '<div id="add-estimate-form" style="margin-bottom: 15px;">';
+                estimatesContent += '<div class="form-row">';
+                estimatesContent += '<input type="text" id="estimate-number" placeholder="見積番号" class="form-control">';
+                estimatesContent += '<input type="text" id="operator-name" placeholder="作業者名" class="form-control">';
+                estimatesContent += '<input type="text" id="task-description" placeholder="任務描述" class="form-control">';
+                estimatesContent += '<input type="text" id="responsible-person" placeholder="擔當者" class="form-control">';
+                estimatesContent += '<input type="text" id="approver" placeholder="承認者" class="form-control">';
+                estimatesContent += '</div>';
+                estimatesContent += '<div class="form-row">';
+                estimatesContent += '<input type="date" id="task-period-start" placeholder="任務開始期限" class="form-control">';
+                estimatesContent += '<input type="date" id="task-period-end" placeholder="任務結束期限" class="form-control">';
+                estimatesContent += '<input type="text" id="unit-price" placeholder="單價" class="form-control">';
+                estimatesContent += '<input type="number" id="quantity" placeholder="数量" class="form-control">';
+                estimatesContent += '<input type="text" id="subtotal" placeholder="小計" class="form-control" readonly>';
+                estimatesContent += '<button id="add-estimate-btn" class="btn btn-primary">新增見積書</button>';
+                estimatesContent += '</div>';
+                estimatesContent += '</div>';
+                estimatesContent += '<table class="table">';
+                estimatesContent += '<thead><tr><th><input type="checkbox" id="select-all-estimates"></th><th>見積書ID</th><th>見積番号</th><th>作業者名</th><th>任務描述</th><th>擔當者</th><th>承認者</th><th>任務開始期限</th><th>任務結束期限</th><th>單價</th><th>数量</th><th>小計</th><th>操作</th></tr></thead><tbody>';
+
+                $.each(estimates, function(index, estimate) {
+                    estimatesContent += '<tr data-id="' + estimate.id + '"><td><input type="checkbox" class="estimate-checkbox" data-email="' + estimate.estimateNumber + '"></td><td>' + estimate.id + '</td><td>' + estimate.estimateNumber + '</td><td>' + estimate.operatorName + '</td><td>' + estimate.taskDescription + '</td><td>' + estimate.responsiblePerson + '</td><td>' + estimate.approver + '</td><td>' + estimate.taskPeriodStart + '</td><td>' + estimate.taskPeriodEnd + '</td><td>' + estimate.unitPrice + '</td><td>' + estimate.quantity + '</td><td>' + estimate.subtotal + '</td>';
+                    estimatesContent += '<td class="operation-buttons"><button class="btn btn-info btn-sm edit-estimate">變更</button></td></tr>';
+                });
+
+                estimatesContent += '</tbody></table>';
+                estimatesContent += '<div id="send-mail-to-estimates-form" style="margin-top: 15px;">';
+                estimatesContent += '<h3>發送郵件給合作夥伴</h3>';
+                estimatesContent += '<input type="text" id="estimate-mail-subject" placeholder="主題" class="form-control">';
+                estimatesContent += '<textarea id="estimate-mail-body" placeholder="內容" class="form-control" rows="4"></textarea>';
+                estimatesContent += '<button id="delete-selected-estimates" class="btn btn-danger btn-sm mt-2 me-2" style="display:none;">刪除選定</button>';
+                estimatesContent += '<button id="send-mail-to-estimates-btn" class="btn btn-secondary btn-sm mt-2" style="display:none;">發送郵件</button>';
+                estimatesContent += '</div>';
+
+                $('#content').html(estimatesContent);
+
+                // 添加事件监听器来更新 subtotal
+                $('#unit-price, #quantity').on('input', function() {
+                    var unitPrice = parseFloat($('#unit-price').val()) || 0;
+                    var quantity = parseInt($('#quantity').val()) || 0;
+                    $('#subtotal').val((unitPrice * quantity).toFixed(2));
+                });
+
+                $(document).on('click', '#add-estimate-btn', function() {
+                    var $btn = $(this); // 保存按钮引用
+                    if ($btn.prop('disabled')) {
+                        return; // 如果按钮已禁用，则退出函数
+                    }
+                    var estimateData = {
+                        estimateNumber: $('#estimate-number').val(),
+                        operatorName: $('#operator-name').val(),
+                        taskDescription: $('#task-description').val(),
+                        taskPeriodStart: $('#task-period-start').val(),
+                        taskPeriodEnd: $('#task-period-end').val(),
+                        unitPrice: parseFloat($('#unit-price').val()),
+                        quantity: parseInt($('#quantity').val()),
+                        subtotal: parseFloat($('#subtotal').val()),
+                        responsiblePerson: $('#responsible-person').val(),
+                        approver: $('#approver').val()
+                    };
+                    if (!estimateData.estimateNumber || !estimateData.operatorName || !estimateData.taskDescription || !estimateData.taskPeriodStart || !estimateData.taskPeriodEnd || isNaN(estimateData.unitPrice) || isNaN(estimateData.quantity) || !estimateData.responsiblePerson || !estimateData.approver) {
+                        alert('新增見積書失敗！所有欄位都必須填寫。');
+                        return;
+                    }
+
+                    // 禁用按钮以防止重复提交
+                    $btn.prop('disabled', true);
+
+                    $.ajax({
+                        url: '/api/estimates/addMultiple',
+                        type: 'POST',
+                        contentType: 'application/json',
+                        data: JSON.stringify(estimateData),
+                        success: function(data) {
+                            alert('見積書新增成功！');
+                            fetchEstimates();
+                        },
+                        error: function(error) {
+                            console.error(error);
+                            alert('新增見積書失敗！');
+                        },
+                        complete: function() {
+                            // 在请求完成后重新启用按钮
+                            $btn.prop('disabled', false);
+
+                            // 清空输入字段
+                            $('#estimate-number').val('');
+                            $('#operator-name').val('');
+                            $('#task-description').val('');
+                            $('#task-period-start').val('');
+                            $('#task-period-end').val('');
+                            $('#unit-price').val('');
+                            $('#quantity').val('');
+                            $('#subtotal').val('');
+                            $('#responsible-person').val('');
+                            $('#approver').val('');
+                        }
+                    });
+                });
+
+                $(document).on('click', '.edit-estimate', function() {
+                    var row = $(this).closest('tr');
+                    var estimateId = row.data('id');
+                    var estimateNumber = row.find('td:eq(2)').text();
+                    var operatorName = row.find('td:eq(3)').text();
+                    var taskDescription = row.find('td:eq(4)').text();
+                    var responsiblePerson = row.find('td:eq(5)').text();
+                    var approver = row.find('td:eq(6)').text();
+                    var taskPeriodStart = row.find('td:eq(7)').text();
+                    var taskPeriodEnd = row.find('td:eq(8)').text();
+                    var unitPrice = row.find('td:eq(9)').text();
+                    var quantity = row.find('td:eq(10)').text();
+                    var subtotal = row.find('td:eq(11)').text();
+
+                    // Convert row to editable fields
+                    row.find('td:eq(2)').html('<input type="text" class="form-control" value="' + estimateNumber + '">');
+                    row.find('td:eq(3)').html('<input type="text" class="form-control" value="' + operatorName + '">');
+                    row.find('td:eq(4)').html('<input type="text" class="form-control" value="' + taskDescription + '">');
+                    row.find('td:eq(5)').html('<input type="text" class="form-control" value="' + responsiblePerson + '">');
+                    row.find('td:eq(6)').html('<input type="text" class="form-control" value="' + approver + '">');
+                    row.find('td:eq(7)').html('<input type="date" class="form-control" value="' + taskPeriodStart + '">');
+                    row.find('td:eq(8)').html('<input type="date" class="form-control" value="' + taskPeriodEnd + '">');
+                    row.find('td:eq(9)').html('<input type="text" class="form-control" value="' + unitPrice + '">');
+                    row.find('td:eq(10)').html('<input type="number" class="form-control" value="' + quantity + '">');
+                    row.find('td:eq(11)').html('<input type="text" class="form-control" value="' + subtotal + '" readonly>');
+                    row.find('td:eq(9) input, td:eq(10) input').on('input', function() {
+                        var updatedUnitPrice = parseFloat(row.find('td:eq(9) input').val()) || 0;
+                        var updatedQuantity = parseInt(row.find('td:eq(10) input').val()) || 0;
+                        row.find('td:eq(11) input').val((updatedUnitPrice * updatedQuantity).toFixed(2));
+                    });
+
+                    // Change button to save button
+                    $(this).removeClass('edit-estimate').addClass('save-estimate').text('保存');
+                });
+
+                $(document).on('click', '.save-estimate', function() {
+                    var row = $(this).closest('tr');
+                    var estimateId = row.data('id');
+                    var estimateData = {
+                        estimateNumber: row.find('td:eq(2) input').val(),
+                        operatorName: row.find('td:eq(3) input').val(),
+                        taskDescription: row.find('td:eq(4) input').val(),
+                        responsiblePerson: row.find('td:eq(5) input').val(),
+                        approver: row.find('td:eq(6) input').val(),
+                        taskPeriodStart: row.find('td:eq(7) input').val(),
+                        taskPeriodEnd: row.find('td:eq(8) input').val(),
+                        unitPrice: parseFloat(row.find('td:eq(9) input').val()),
+                        quantity: parseInt(row.find('td:eq(10) input').val()),
+                        subtotal: parseFloat(row.find('td:eq(11) input').val())
+                    };
+
+                    $.ajax({
+                        url: '/api/estimates/update/' + estimateId,
+                        type: 'PUT',
+                        contentType: 'application/json',
+                        data: JSON.stringify(estimateData),
+                        success: function(data) {
+                            alert('見積書更新成功！');
+                            fetchEstimates();
+                        },
+                        error: function(error) {
+                            alert('見積書更新失敗！');
+                        }
+                    });
+                });
+
+                $(document).on('click', '#select-all-estimates', function() {
+                    $('.estimate-checkbox').prop('checked', this.checked).trigger('change');
+                });
+
+                $(document).on('change', '.estimate-checkbox', function() {
+                    var anyChecked = $('.estimate-checkbox:checked').length > 0;
+                    $('#delete-selected-estimates, #send-mail-to-estimates-btn').toggle(anyChecked);
+                });
+
+                $(document).on('click', '#delete-selected-estimates', function() {
+                    var $btn = $(this); // 保存按钮引用
+                    if ($btn.prop('disabled')) {
+                        return; // 如果按钮已禁用，则退出函数
+                    }
+                    var selectedCheckboxes = $('.estimate-checkbox:checked');
+                    var selectedIds = [];
+                    selectedCheckboxes.each(function() {
+                        var estimateId = $(this).closest('tr').data('id');
+                        selectedIds.push(estimateId);
+                    });
+                    var confirmation = confirm("确定要批量删除所选見積書吗？");
+                    if (confirmation) {
+                        // 禁用按钮以防止重复提交
+                        $btn.prop('disabled', true);
+                        $.ajax({
+                            url: '/api/estimates/delete',
+                            type: 'DELETE',
+                            contentType: 'application/json',
+                            data: JSON.stringify(selectedIds),
+                            success: function(response) {
+                                alert('删除成功');
+                                fetchEstimates();
+                            },
+                            error: function(xhr, status, error) {
+                                alert('删除失败');
+                            },
+                            complete: function() {
+                                // 在请求完成后重新启用按钮
+                                $btn.prop('disabled', false);
+                            }
+                        });
+                    } else {
+                        alert('已取消');
+                    }
+                    $('.estimate-checkbox:checked').prop('checked', false).trigger('change');
+                });
+
+                $(document).on('click', '#send-mail-to-estimates-btn', function() {
+                    var mailSubject = $('#estimate-mail-subject').val();
+                    var mailBody = $('#estimate-mail-body').val();
+                    var mailAccount = $('#email-account').val();
+                    var mailPassword = $('#email-password').val();
+                    var selectedEmails = $('.estimate-checkbox:checked').map(function() {
+                        return $(this).data('email');
+                    }).get();
+
+                    alert('发送邮件给合作夥伴:\n主题: ' + mailSubject + '\n内容: ' + mailBody + '\n帐号: ' + mailAccount + '\n密码: ' + mailPassword + '\n收件人邮箱: ' + selectedEmails);
+
+                    var emailDetails = {
+                        emails: selectedEmails,
+                        subject: mailSubject,
+                        content: mailBody,
+                        account: mailAccount,
+                        password: mailPassword
+                    };
+
+                    $.ajax({
+                        url: '/api/estimates/sendEmails',
+                        type: 'POST',
+                        contentType: 'application/json',
+                        data: JSON.stringify(emailDetails),
+                        success: function(data) {
+                            console.log(data);
+                            alert('邮件发送成功！');
+                        },
+                        error: function(xhr, status, error) {
+                            console.error(error);
+                            alert('邮件发送失败！');
+                        }
+                    });
+                });
+            },
+            error: function(request, status, error) {
+                $('#content').html('<p>无法加载見積書数据。错误信息：' + request.responseText + '</p>');
+            }
+        });
+    }
+
+    fetchEstimates();
+
+    $('#search-btn').click(function() {
+        var searchParams = {
+            keyword: $('#search-estimateNumber').val()
+        };
+        fetchEstimates(searchParams);
+    });
+});
+</script>
+
+</body>
+</html>
