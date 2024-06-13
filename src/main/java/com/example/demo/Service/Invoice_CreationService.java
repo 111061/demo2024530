@@ -7,6 +7,8 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import java.io.IOException;
 import java.io.FileOutputStream;
+import java.time.LocalDate;
+import java.time.format.DateTimeFormatter;
 import java.io.FileInputStream;
 import java.io.ByteArrayInputStream;
 import java.io.ByteArrayOutputStream;
@@ -20,6 +22,10 @@ import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 
 import java.util.List;
 
+
+
+
+
 @Service
 public class Invoice_CreationService {
 
@@ -27,6 +33,18 @@ public class Invoice_CreationService {
 
     @Autowired
     private Invoice_CreationRepository invoiceCreationRepository;
+
+    // roundUp 方法
+    public static double roundUp(double value, int places) {
+        if (places < 0) {
+            double scale = Math.pow(10, -places);
+            return Math.ceil(value / scale) * scale;
+        } else {
+            double scale = Math.pow(10, places);
+            return Math.ceil(value * scale) / scale;
+        }
+    }
+
 
     public byte[] exportInvoiceById(Long id) {
         ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
@@ -59,8 +77,30 @@ public class Invoice_CreationService {
             row.getCell(10).setCellValue(invoiceCreation.getWorkTime()); // K23
             row.getCell(11).setCellValue(invoiceCreation.getSettlementValue()); // L23
             row.getCell(12).setCellValue(total); // M23
-            double check_settlement = invoiceCreation.getSettlementValue();
-            logger.info("Checking settlement value: {}", check_settlement);
+
+            Row row27 = sheet.getRow(27);
+            row27.getCell(12).setCellValue(total);//M28
+
+
+            Row row19 = sheet.getRow(19);
+            row19.getCell(2).setCellValue(total+roundUp((total*0.1),0));//C20
+
+            Row row28 = sheet.getRow(28);
+            row28.getCell(12).setCellValue(roundUp((total*0.1),0));//M29
+
+            Row row8 = sheet.getRow(8);
+            row8.getCell(1).setCellValue(invoiceCreation.getParentCompany());//B9
+
+            Row row29 = sheet.getRow(29);
+            row29.getCell(12).setCellValue(total+roundUp((total*0.1),0));//M30
+
+            // Set current date in cell M12
+            LocalDate currentDate = LocalDate.now();
+            DateTimeFormatter formatter = DateTimeFormatter.ofPattern("yyyy/MM/dd");
+            String formattedDate = currentDate.format(formatter);
+            Row row11 = sheet.getRow(11);
+            row11.getCell(12).setCellValue(formattedDate); // M12
+
 
 
             // Write changes to the output stream
@@ -74,57 +114,6 @@ public class Invoice_CreationService {
 
 
 
-    public ByteArrayInputStream exportInvoicesToExcel() {
-        List<Invoice_Creation> invoices = invoiceCreationRepository.findAll();
-
-        try (Workbook workbook = new XSSFWorkbook()) {
-            Sheet sheet = workbook.createSheet("Invoices");
-
-            Row headerRow = sheet.createRow(0);
-            headerRow.createCell(0).setCellValue("注文番号");
-            headerRow.createCell(1).setCellValue("作業担当");
-            headerRow.createCell(2).setCellValue("プロジェクト名");
-            headerRow.createCell(3).setCellValue("単価（円）");
-            headerRow.createCell(4).setCellValue("精算上限");
-            headerRow.createCell(5).setCellValue("精算下限");
-            headerRow.createCell(6).setCellValue("控除単価");
-            headerRow.createCell(7).setCellValue("超過単価");
-            headerRow.createCell(8).setCellValue("出勤時間");
-            headerRow.createCell(9).setCellValue("精算金額");
-            headerRow.createCell(10).setCellValue("小計(円)");
-
-
-
-            // Add other headers...
-
-            int rowIdx = 1;
-            for (Invoice_Creation invoice : invoices) {
-                Row row = sheet.createRow(rowIdx++);
-                row.createCell(0).setCellValue(invoice.getOrderNumber());
-                row.createCell(1).setCellValue(invoice.getEngineer());
-                row.createCell(2).setCellValue(invoice.getProjectName());
-                row.createCell(3).setCellValue(invoice.getUnitPrice());
-                row.createCell(4).setCellValue(invoice.getSettlementUpperLimit());
-                row.createCell(5).setCellValue(invoice.getSettlementLowerLimit());
-                row.createCell(6).setCellValue(invoice.getDeductionUnitPriceTotal());
-                row.createCell(7).setCellValue(invoice.getOvertimeUnitPrice());
-                row.createCell(8).setCellValue(invoice.getWorkTime());
-                row.createCell(9).setCellValue(invoice.getSettlementValue());
-
-
-                //row.createCell(10).setCellValue(invoice.get());
-
-
-                // Add other fields...
-            }
-
-            ByteArrayOutputStream out = new ByteArrayOutputStream();
-            workbook.write(out);
-            return new ByteArrayInputStream(out.toByteArray());
-        } catch (IOException e) {
-            throw new RuntimeException("Failed to export invoices to Excel file", e);
-        }
-    }
 
 
 
