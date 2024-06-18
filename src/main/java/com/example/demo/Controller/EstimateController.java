@@ -6,13 +6,12 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
+import java.io.IOException;
 import java.util.List;
 
 @RestController
 @RequestMapping("/api/estimates")
 public class EstimateController {
-
     private final EstimateService estimateService;
 
     @Autowired
@@ -24,23 +23,10 @@ public class EstimateController {
     public ResponseEntity<List<Estimate>> addMultipleEstimates(@RequestBody Estimate estimate) {
         try {
             List<Estimate> savedEstimates = estimateService.addMultipleEstimates(estimate);
-            return new ResponseEntity<>(savedEstimates, HttpStatus.CREATED);
+            return ResponseEntity.ok(savedEstimates);
         } catch (Exception e) {
             e.printStackTrace();
-            return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
-        }
-    }
-
-    @GetMapping("/all")
-    public ResponseEntity<List<Estimate>> getAllEstimates() {
-        try {
-            List<Estimate> estimates = estimateService.findAllEstimates();
-            if (estimates.isEmpty()) {
-                return ResponseEntity.noContent().build();
-            }
-            return ResponseEntity.ok(estimates);
-        } catch (Exception e) {
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
         }
     }
 
@@ -48,12 +34,22 @@ public class EstimateController {
     public ResponseEntity<List<Estimate>> searchEstimates(@RequestParam(required = false, defaultValue = "") String keyword) {
         try {
             List<Estimate> estimates = estimateService.searchEstimates(keyword);
-            if (estimates.isEmpty()) {
-                return ResponseEntity.noContent().build();
-            }
             return ResponseEntity.ok(estimates);
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+    }
+
+    @PostMapping("/export")
+    public ResponseEntity<String> exportToExcel(@RequestBody List<Long> estimateIds) {
+        String inputFilePath = "C:\\Users\\www\\IdeaProjects\\demo\\見積書.xlsx";
+        String outputFilePath = "C:\\Users\\www\\IdeaProjects\\demo\\新見積書.xlsx";
+
+        try {
+            estimateService.exportEstimatesToExcel(inputFilePath, outputFilePath, estimateIds);
+            return ResponseEntity.ok("导出成功！");
+        } catch (IOException e) {
+            return ResponseEntity.status(500).body("导出失败: " + e.getMessage());
         }
     }
 
@@ -61,7 +57,7 @@ public class EstimateController {
     public ResponseEntity<Void> deleteEstimates(@RequestBody List<Long> ids) {
         try {
             estimateService.deleteEstimatesByIds(ids);
-            return new ResponseEntity<>(HttpStatus.OK);
+            return ResponseEntity.ok().build();
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
@@ -80,5 +76,11 @@ public class EstimateController {
             e.printStackTrace();
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
+    }
+
+    // 添加服务以根据ID列表查找估算
+    @GetMapping("/findByIds")
+    public List<Estimate> findEstimatesByIds(@RequestBody List<Long> ids) {
+        return estimateService.findEstimatesByIds(ids);
     }
 }

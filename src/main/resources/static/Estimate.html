@@ -96,7 +96,7 @@
 <script src="js/bootstrap.min.js"></script>
 <script>
 $(document).ready(function() {
-    function fetchEstimates(searchParams = {}) {
+    function fetchEstimates(searchParams = {}, selectIds = []) {
         $.ajax({
             url: '/api/estimates/search',
             type: 'GET',
@@ -125,7 +125,7 @@ $(document).ready(function() {
                 estimatesContent += '<thead><tr><th><input type="checkbox" id="select-all-estimates"></th><th>見積書ID</th><th>見積番号</th><th>作業者名</th><th>任務描述</th><th>擔當者</th><th>承認者</th><th>任務開始期限</th><th>任務結束期限</th><th>單價</th><th>数量</th><th>小計</th><th>操作</th></tr></thead><tbody>';
 
                 $.each(estimates, function(index, estimate) {
-                    estimatesContent += '<tr data-id="' + estimate.id + '"><td><input type="checkbox" class="estimate-checkbox" data-email="' + estimate.estimateNumber + '"></td><td>' + estimate.id + '</td><td>' + estimate.estimateNumber + '</td><td>' + estimate.operatorName + '</td><td>' + estimate.taskDescription + '</td><td>' + estimate.responsiblePerson + '</td><td>' + estimate.approver + '</td><td>' + estimate.taskPeriodStart + '</td><td>' + estimate.taskPeriodEnd + '</td><td>' + estimate.unitPrice + '</td><td>' + estimate.quantity + '</td><td>' + estimate.subtotal + '</td>';
+                    estimatesContent += '<tr data-id="' + estimate.id + '"><td><input type="checkbox" class="estimate-checkbox" data-id="' + estimate.id + '"></td><td>' + estimate.id + '</td><td>' + estimate.estimateNumber + '</td><td>' + estimate.operatorName + '</td><td>' + estimate.taskDescription + '</td><td>' + estimate.responsiblePerson + '</td><td>' + estimate.approver + '</td><td>' + estimate.taskPeriodStart + '</td><td>' + estimate.taskPeriodEnd + '</td><td>' + estimate.unitPrice + '</td><td>' + estimate.quantity + '</td><td>' + estimate.subtotal + '</td>';
                     estimatesContent += '<td class="operation-buttons"><button class="btn btn-info btn-sm edit-estimate">變更</button></td></tr>';
                 });
 
@@ -135,7 +135,8 @@ $(document).ready(function() {
                 estimatesContent += '<input type="text" id="estimate-mail-subject" placeholder="主題" class="form-control">';
                 estimatesContent += '<textarea id="estimate-mail-body" placeholder="內容" class="form-control" rows="4"></textarea>';
                 estimatesContent += '<button id="delete-selected-estimates" class="btn btn-danger btn-sm mt-2 me-2" style="display:none;">刪除選定</button>';
-                estimatesContent += '<button id="send-mail-to-estimates-btn" class="btn btn-secondary btn-sm mt-2" style="display:none;">發送郵件</button>';
+                estimatesContent += '<button id="send-mail-to-estimates-btn" class="btn btn-secondary btn-sm mt-2 me-2" style="display:none;">發送郵件</button>';
+                estimatesContent += '<button id="add-new-estimate-btn" class="btn btn-success btn-sm mt-2" style="display:none;">見積書作成</button>';
                 estimatesContent += '</div>';
 
                 $('#content').html(estimatesContent);
@@ -146,6 +147,14 @@ $(document).ready(function() {
                     var quantity = parseInt($('#quantity').val()) || 0;
                     $('#subtotal').val((unitPrice * quantity).toFixed(2));
                 });
+
+                // Check the new IDs and show buttons if any are selected
+                if (selectIds.length > 0) {
+                    selectIds.forEach(function(id) {
+                        $('input.estimate-checkbox[data-id="' + id + '"]').prop('checked', true);
+                    });
+                    $('#delete-selected-estimates, #send-mail-to-estimates-btn, #add-new-estimate-btn').show();
+                }
 
                 $(document).on('click', '#add-estimate-btn', function() {
                     var $btn = $(this); // 保存按钮引用
@@ -179,7 +188,8 @@ $(document).ready(function() {
                         data: JSON.stringify(estimateData),
                         success: function(data) {
                             alert('見積書新增成功！');
-                            fetchEstimates();
+                            var newIds = data.map(function(est) { return est.id; });
+                            fetchEstimates({}, newIds);
                         },
                         error: function(error) {
                             console.error(error);
@@ -276,7 +286,7 @@ $(document).ready(function() {
 
                 $(document).on('change', '.estimate-checkbox', function() {
                     var anyChecked = $('.estimate-checkbox:checked').length > 0;
-                    $('#delete-selected-estimates, #send-mail-to-estimates-btn').toggle(anyChecked);
+                    $('#delete-selected-estimates, #send-mail-to-estimates-btn, #add-new-estimate-btn').toggle(anyChecked);
                 });
 
                 $(document).on('click', '#delete-selected-estimates', function() {
@@ -348,6 +358,38 @@ $(document).ready(function() {
                         error: function(xhr, status, error) {
                             console.error(error);
                             alert('邮件发送失败！');
+                        }
+                    });
+                });
+
+                // 新增 "見積書作成" 按鈕的事件处理器
+                $(document).on('click', '#add-new-estimate-btn', function() {
+                    var selectedIds = $('.estimate-checkbox:checked').map(function() {
+                        return $(this).closest('tr').data('id');
+                    }).get();
+
+                    if (selectedIds.length === 0) {
+                        alert('請選擇至少一個見積書');
+                        return;
+                    }
+
+                    $.ajax({
+                        url: '/api/estimates/export',
+                        type: 'POST',
+                        contentType: 'application/json',
+                        data: JSON.stringify(selectedIds),
+                        xhrFields: {
+                            responseType: 'blob'
+                        },
+                        success: function(data) {
+                            var link = document.createElement('a');
+                            link.href = window.URL.createObjectURL(data);
+                            link.download = '見積書.xlsx';
+                            link.click();
+                        },
+                        error: function(xhr, status, error) {
+                            console.error(error);
+                            alert('見積書導出失敗！');
                         }
                     });
                 });

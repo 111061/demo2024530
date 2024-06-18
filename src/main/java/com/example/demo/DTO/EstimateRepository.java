@@ -12,4 +12,6 @@ public interface EstimateRepository extends JpaRepository<Estimate, Long> {
 
     @Query("SELECT e FROM Estimate e WHERE e.estimateNumber LIKE %:keyword% OR e.operatorName LIKE %:keyword% OR e.taskDescription LIKE %:keyword% OR e.responsiblePerson LIKE %:keyword% OR e.approver LIKE %:keyword%")
     List<Estimate> searchByKeyword(@Param("keyword") String keyword);
+    @Query("SELECT e FROM Estimate e WHERE e.id IN :ids")
+    List<Estimate> findAllByIds(@Param("ids") List<Long> ids);
 }
