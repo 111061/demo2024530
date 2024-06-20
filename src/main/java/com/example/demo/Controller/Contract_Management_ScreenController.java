@@ -125,7 +125,7 @@ public class Contract_Management_ScreenController {
     //xsl連接
     String projectRoot = System.getProperty("user.dir");
 
-    private final Path fileStorageLocation = Paths.get(projectRoot, "Estimate").toAbsolutePath().normalize();
+    private final Path fileStorageLocation = Paths.get(projectRoot, "src", "main", "resources", "template", "Estimate").toAbsolutePath().normalize();
 
     @GetMapping("/download")
     public ResponseEntity<Resource> downloadFile(@RequestParam String fileName) {

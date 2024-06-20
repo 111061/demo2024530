@@ -63,8 +63,8 @@ public class EstimateController {
         String projectRoot = System.getProperty("user.dir");
 
         // 构建相对路径
-        String inputFilePath = Paths.get(projectRoot,  "見積書.xlsx").toString();
-        String outputFilePath = Paths.get(projectRoot, "Estimate", estimateNumber + ".xlsx").toString();
+        String inputFilePath = Paths.get(projectRoot, "src", "main", "resources", "template", "見積書.xlsx").toString();
+        String outputFilePath = Paths.get(projectRoot, "src", "main", "resources", "template", "Estimate", estimateNumber + ".xlsx").toString();
 
         System.out.print(inputFilePath+"..."+outputFilePath);
 
