@@ -9,6 +9,13 @@ import java.util.List;
 import org.springframework.http.HttpStatus;
 import com.example.demo.Service.EmailService;
 import com.example.demo.DTO.EmailDetails;
+import org.springframework.core.io.Resource;
+import org.springframework.core.io.UrlResource;
+import org.springframework.http.HttpHeaders;
+import org.springframework.web.bind.annotation.GetMapping;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.net.MalformedURLException;
 
 @RestController
 @RequestMapping("/api/contracts")
@@ -115,6 +122,26 @@ public class Contract_Management_ScreenController {
             return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
+    //xsl連接
+    private final Path fileStorageLocation = Paths.get("C:\\Users\\a1044\\IdeaProjects\\demo2024530\\Estimate").toAbsolutePath().normalize();
+
+    @GetMapping("/download")
+    public ResponseEntity<Resource> downloadFile(@RequestParam String fileName) {
+        try {
+            Path filePath = fileStorageLocation.resolve(fileName).normalize();
+            Resource resource = new UrlResource(filePath.toUri());
+
+            if (resource.exists()) {
+                return ResponseEntity.ok()
+                        .header(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + resource.getFilename() + "\"")
+                        .body(resource);
+            } else {
+                return ResponseEntity.notFound().build();
+            }
+        } catch (MalformedURLException ex) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
+        }
+    }
 
     // 群发邮件
     @PostMapping("/sendEmails")
@@ -136,6 +163,3 @@ public class Contract_Management_ScreenController {
         }
     }
 }
-
-
-

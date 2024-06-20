@@ -8,15 +8,28 @@ import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import java.io.IOException;
 import java.util.List;
-
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.MediaType;
+import java.io.File;
+import java.nio.file.Files;
+import com.example.demo.DTO.EstimateRepository;
+import java.util.stream.Collectors;
 @RestController
 @RequestMapping("/api/estimates")
 public class EstimateController {
     private final EstimateService estimateService;
 
     @Autowired
+    private EstimateRepository estimateRepository;
     public EstimateController(EstimateService estimateService) {
         this.estimateService = estimateService;
+    }
+    @GetMapping("/numbers")
+    public List<String> getAllEstimateNumbers() {
+        return estimateRepository.findAll().stream()
+                .map(Estimate::getEstimateNumber)
+                .distinct() // 去重
+                .collect(Collectors.toList());
     }
 
     @PostMapping("/addMultiple")
@@ -41,15 +54,50 @@ public class EstimateController {
     }
 
     @PostMapping("/export")
-    public ResponseEntity<String> exportToExcel(@RequestBody List<Long> estimateIds) {
-        String inputFilePath = "C:\\Users\\www\\IdeaProjects\\demo\\見積書.xlsx";
-        String outputFilePath = "C:\\Users\\www\\IdeaProjects\\demo\\新見積書.xlsx";
+    public ResponseEntity<byte[]> exportToExcel(@RequestBody ExportRequest exportRequest) {
+        String estimateNumber = exportRequest.getEstimateNumber();
+        List<Long> estimateIds = exportRequest.getEstimateIds();
+
+        String inputFilePath = "C:\\Users\\a1044\\IdeaProjects\\demo2024530\\見積書.xlsx";
+        String outputFilePath = "C:\\Users\\a1044\\IdeaProjects\\demo2024530\\Estimate\\" + estimateNumber + ".xlsx";
 
         try {
             estimateService.exportEstimatesToExcel(inputFilePath, outputFilePath, estimateIds);
-            return ResponseEntity.ok("导出成功！");
+
+            // Read the output file and return as a byte array
+            File file = new File(outputFilePath);
+            byte[] fileContent = Files.readAllBytes(file.toPath());
+
+            HttpHeaders headers = new HttpHeaders();
+            headers.setContentType(MediaType.APPLICATION_OCTET_STREAM);
+            headers.setContentDispositionFormData("attachment", estimateNumber + ".xlsx");
+
+            return new ResponseEntity<>(fileContent, headers, HttpStatus.OK);
         } catch (IOException e) {
-            return ResponseEntity.status(500).body("导出失败: " + e.getMessage());
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body(null);
+        }
+    }
+
+    // Define a class to handle the request payload
+    public static class ExportRequest {
+        private List<Long> estimateIds;
+        private String estimateNumber;
+
+        // Getters and Setters
+        public List<Long> getEstimateIds() {
+            return estimateIds;
+        }
+
+        public void setEstimateIds(List<Long> estimateIds) {
+            this.estimateIds = estimateIds;
+        }
+
+        public String getEstimateNumber() {
+            return estimateNumber;
+        }
+
+        public void setEstimateNumber(String estimateNumber) {
+            this.estimateNumber = estimateNumber;
         }
     }
 

@@ -104,82 +104,113 @@
 <script>
 $(document).ready(function() {
     function fetchContracts(searchParams = {}) {
+    $.ajax({
+        url: '/api/contracts/search',
+        type: 'GET',
+        data: searchParams,
+        dataType: 'json',
+        success: function(contracts) {
+            var contractsContent = '<h2>契約管理列表</h2>';
+            contractsContent += '<div id="add-contract-form" style="margin-bottom: 15px;">';
+            contractsContent += '<div class="form-row">';
+            contractsContent += '<input type="text" id="contract-contractingCompany" placeholder="契約名義公司" class="form-control">';
+            contractsContent += '<input type="text" id="contract-contractedCompany" placeholder="契約相手公司" class="form-control">';
+            contractsContent += '<select id="contract-contractType" class="form-control">';
+            contractsContent += '<option value="派遣契約">派遣契約</option>';
+            contractsContent += '<option value="委任契約">委任契約</option>';
+            contractsContent += '<option value="SES.準委任">SES.準委任</option>';
+            contractsContent += '</select>';
+            contractsContent += '<select id="contract-ourPosition" class="form-control">';
+            contractsContent += '<option value="上位">上位</option>';
+            contractsContent += '<option value="下位">下位</option>';
+            contractsContent += '</select>';
+            contractsContent += '</div>';
+            contractsContent += '<div class="form-row">';
+            contractsContent += '<input type="text" id="contract-ourSalesRepresentative" placeholder="成約營業" class="form-control">';
+            contractsContent += '<input type="text" id="contract-theirSalesRepresentative" placeholder="相手營業" class="form-control">';
+            contractsContent += '<input type="date" id="contract-contractDate" placeholder="成功日付" class="form-control">';
+            contractsContent += '<select id="contract-quotation" class="form-control"></select>';
+            contractsContent += '<button id="add-contract-btn" class="btn btn-primary">新增契約</button>';
+            contractsContent += '</div>';
+            contractsContent += '</div>';
+            contractsContent += '<table class="table">';
+            contractsContent += '<thead><tr><th><input type="checkbox" id="select-all-contracts"></th><th>契約編號</th><th>契約名義公司</th><th>契約相手公司</th><th>契約種類</th><th>自社立場</th><th>成約營業</th><th>相手營業</th><th>成功日付</th><th>見積書</th><th>操作</th></tr></thead><tbody>';
+
+            var contractingCompanies = new Set();
+            var ourPositions = new Set();
+            var contractTypes = new Set();
+
+            $.each(contracts, function(index, contract) {
+                var quotationContent;
+                if (contract.quotation === "必要ではない") {
+                    quotationContent = contract.quotation;
+                } else {
+                    quotationContent = '<a href="/api/contracts/download?fileName=' + encodeURIComponent(contract.quotation) + '.xlsx" download>' + contract.quotation + '</a>';
+                }
+
+                contractsContent += '<tr data-id="' + contract.contractCode + '"><td><input type="checkbox" class="contract-checkbox" data-email="' + contract.quotation + '"></td><td>' + contract.contractCode + '</td><td>' + contract.contractingCompany + '</td><td>' + contract.contractedCompany + '</td><td>' + contract.contractType + '</td><td>' + contract.ourPosition + '</td><td>' + contract.ourSalesRepresentative + '</td><td>' + contract.theirSalesRepresentative + '</td><td>' + contract.contractDate + '</td><td>' + quotationContent + '</td>';
+                contractsContent += '<td class="operation-buttons"><button class="btn btn-info btn-sm edit-contract">變更</button></td></tr>';
+
+                contractingCompanies.add(contract.contractingCompany);
+                ourPositions.add(contract.ourPosition);
+                contractTypes.add(contract.contractType);
+            });
+
+            contractsContent += '</tbody></table>';
+            contractsContent += '<div id="send-mail-to-contracts-form" style="margin-top: 15px;">';
+            contractsContent += '<h3>發送郵件給契約對象</h3>';
+            contractsContent += '<input type="text" id="contract-mail-subject" placeholder="主題" class="form-control">';
+            contractsContent += '<textarea id="contract-mail-body" placeholder="內容" class="form-control" rows="4"></textarea>';
+            contractsContent += '<button id="delete-selected-contracts" class="btn btn-danger btn-sm mt-2 me-2" style="display:none;">刪除選定</button>';
+            contractsContent += '<button id="send-mail-to-contracts-btn" class="btn btn-secondary btn-sm mt-2" style="display:none;">發送郵件</button>';
+            contractsContent += '</div>';
+
+            $('#content').html(contractsContent);
+
+            // Populate search options
+            $('#search-contractingCompany').empty().append('<option value="ALL">契約名義公司</option>');
+            $('#search-ourPosition').empty().append('<option value="ALL">自社立場</option>');
+            $('#search-contractType').empty().append('<option value="ALL">契約種類</option>');
+
+            contractingCompanies.forEach(function(company) {
+                $('#search-contractingCompany').append('<option value="' + company + '">' + company + '</option>');
+            });
+            ourPositions.forEach(function(position) {
+                $('#search-ourPosition').append('<option value="' + position + '">' + position + '</option>');
+            });
+            contractTypes.forEach(function(type) {
+                $('#search-contractType').append('<option value="' + type + '">' + type + '</option>');
+            });
+
+            $('#delete-selected-contracts, #send-mail-to-contracts-btn').hide();
+            $('#select-all-contracts').prop('checked', false);
+
+            // Fetch estimate numbers and populate the dropdown
+            fetchEstimateNumbers();
+        },
+        error: function(request, status, error) {
+            $('#content').html('<p>无法加载契約数据。错误信息：' + request.responseText + '</p>');
+        }
+    });
+}
+
+    function fetchEstimateNumbers() {
         $.ajax({
-            url: '/api/contracts/search',
+            url: '/api/estimates/numbers',
             type: 'GET',
-            data: searchParams,
-            dataType: 'json',
-            success: function(contracts) {
-                var contractsContent = '<h2>契約管理列表</h2>';
-                contractsContent += '<div id="add-contract-form" style="margin-bottom: 15px;">';
-                contractsContent += '<div class="form-row">';
-                contractsContent += '<input type="text" id="contract-contractingCompany" placeholder="契約名義公司" class="form-control">';
-                contractsContent += '<input type="text" id="contract-contractedCompany" placeholder="契約相手公司" class="form-control">';
-                contractsContent += '<select id="contract-contractType" class="form-control">';
-                contractsContent += '<option value="派遣契約">派遣契約</option>';
-                contractsContent += '<option value="委任契約">委任契約</option>';
-                contractsContent += '<option value="SES.準委任">SES.準委任</option>';
-                contractsContent += '</select>';
-                contractsContent += '<select id="contract-ourPosition" class="form-control">';
-                contractsContent += '<option value="上位">上位</option>';
-                contractsContent += '<option value="下位">下位</option>';
-                contractsContent += '</select>';
-                contractsContent += '</div>';
-                contractsContent += '<div class="form-row">';
-                contractsContent += '<input type="text" id="contract-ourSalesRepresentative" placeholder="成約營業" class="form-control">';
-                contractsContent += '<input type="text" id="contract-theirSalesRepresentative" placeholder="相手營業" class="form-control">';
-                contractsContent += '<input type="date" id="contract-contractDate" placeholder="成功日付" class="form-control">';
-                contractsContent += '<input type="text" id="contract-quotation" placeholder="見積書" class="form-control">';
-                contractsContent += '<button id="add-contract-btn" class="btn btn-primary">新增契約</button>';
-                contractsContent += '</div>';
-                contractsContent += '</div>';
-                contractsContent += '<table class="table">';
-                contractsContent += '<thead><tr><th><input type="checkbox" id="select-all-contracts"></th><th>契約編號</th><th>契約名義公司</th><th>契約相手公司</th><th>契約種類</th><th>自社立場</th><th>成約營業</th><th>相手營業</th><th>成功日付</th><th>見積書</th><th>操作</th></tr></thead><tbody>';
-                
-                var contractingCompanies = new Set();
-                var ourPositions = new Set();
-                var contractTypes = new Set();
-                
-                $.each(contracts, function(index, contract) {
-                    contractsContent += '<tr data-id="' + contract.contractCode + '"><td><input type="checkbox" class="contract-checkbox" data-email="' + contract.quotation + '"></td><td>' + contract.contractCode + '</td><td>' + contract.contractingCompany + '</td><td>' + contract.contractedCompany + '</td><td>' + contract.contractType + '</td><td>' + contract.ourPosition + '</td><td>' + contract.ourSalesRepresentative + '</td><td>' + contract.theirSalesRepresentative + '</td><td>' + contract.contractDate + '</td><td>' + contract.quotation + '</td>';
-                    contractsContent += '<td class="operation-buttons"><button class="btn btn-info btn-sm edit-contract">變更</button></td></tr>';
-                    
-                    contractingCompanies.add(contract.contractingCompany);
-                    ourPositions.add(contract.ourPosition);
-                    contractTypes.add(contract.contractType);
+            success: function(numbers) {
+                var uniqueNumbers = [...new Set(numbers)]; // 去重
+                var options = '<option value="">選擇見積書</option>';
+                $.each(uniqueNumbers, function(index, number) {
+                    if (number !== '必要ではない') {
+                        options += '<option value="' + number + '">' + number + '</option>';
+                    }
                 });
-
-                contractsContent += '</tbody></table>';
-                contractsContent += '<div id="send-mail-to-contracts-form" style="margin-top: 15px;">';
-                contractsContent += '<h3>發送郵件給契約對象</h3>';
-                contractsContent += '<input type="text" id="contract-mail-subject" placeholder="主題" class="form-control">';
-                contractsContent += '<textarea id="contract-mail-body" placeholder="內容" class="form-control" rows="4"></textarea>';
-                contractsContent += '<button id="delete-selected-contracts" class="btn btn-danger btn-sm mt-2 me-2" style="display:none;">刪除選定</button>';
-                contractsContent += '<button id="send-mail-to-contracts-btn" class="btn btn-secondary btn-sm mt-2" style="display:none;">發送郵件</button>';
-                contractsContent += '</div>';
-
-                $('#content').html(contractsContent);
-
-                // Populate search options
-                $('#search-contractingCompany').empty().append('<option value="ALL">契約名義公司</option>');
-                $('#search-ourPosition').empty().append('<option value="ALL">自社立場</option>');
-                $('#search-contractType').empty().append('<option value="ALL">契約種類</option>');
-
-                contractingCompanies.forEach(function(company) {
-                    $('#search-contractingCompany').append('<option value="' + company + '">' + company + '</option>');
-                });
-                ourPositions.forEach(function(position) {
-                    $('#search-ourPosition').append('<option value="' + position + '">' + position + '</option>');
-                });
-                contractTypes.forEach(function(type) {
-                    $('#search-contractType').append('<option value="' + type + '">' + type + '</option>');
-                });
-
-                $('#delete-selected-contracts, #send-mail-to-contracts-btn').hide();
-                $('#select-all-contracts').prop('checked', false);
+                options += '<option value="必要ではない">必要ではない</option>';
+                $('#contract-quotation').html(options);
             },
             error: function(request, status, error) {
-                $('#content').html('<p>无法加载契約数据。错误信息：' + request.responseText + '</p>');
+                console.error('无法获取见积书号码。错误信息：', request.responseText);
             }
         });
     }
@@ -321,9 +352,11 @@ $(document).ready(function() {
         row.find('td:eq(6)').html('<input type="text" class="form-control" value="' + ourSalesRepresentative + '">');
         row.find('td:eq(7)').html('<input type="text" class="form-control" value="' + theirSalesRepresentative + '">');
         row.find('td:eq(8)').html('<input type="date" class="form-control" value="' + contractDate + '">');
-        row.find('td:eq(9)').html('<input type="text" class="form-control" value="' + quotation + '">');
+        row.find('td:eq(9)').html('<select class="form-control"></select>');
+        row.find('td:eq(9) select').html($('#contract-quotation').html()); // Copy options from the add form
         row.find('td:eq(4) select').val(contractType);
         row.find('td:eq(5) select').val(ourPosition);
+        row.find('td:eq(9) select').val(quotation);
 
         // Change button to save button
         $(this).removeClass('edit-contract').addClass('save-contract').text('保存');
@@ -340,7 +373,7 @@ $(document).ready(function() {
             ourSalesRepresentative: row.find('td:eq(6) input').val(),
             theirSalesRepresentative: row.find('td:eq(7) input').val(),
             contractDate: row.find('td:eq(8) input').val(),
-            quotation: row.find('td:eq(9) input').val()
+            quotation: row.find('td:eq(9) select').val()
         };
 
         $.ajax({
@@ -357,7 +390,7 @@ $(document).ready(function() {
             }
         });
     });
-});
+    });
 </script>
 
 </body>

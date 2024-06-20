@@ -364,6 +364,11 @@ $(document).ready(function() {
 
                 // 新增 "見積書作成" 按鈕的事件处理器
                 $(document).on('click', '#add-new-estimate-btn', function() {
+                    var $btn = $(this); // 保存按钮引用
+                    if ($btn.prop('disabled')) {
+                        return; // 如果按钮已禁用，则退出函数
+                    }
+
                     var selectedIds = $('.estimate-checkbox:checked').map(function() {
                         return $(this).closest('tr').data('id');
                     }).get();
@@ -373,26 +378,48 @@ $(document).ready(function() {
                         return;
                     }
 
+                    // 检查所有选中的见積番号是否相同
+                    var selectedEstimateNumbers = $('.estimate-checkbox:checked').map(function() {
+                        return $(this).closest('tr').find('td:eq(2)').text();
+                    }).get();
+
+                    var uniqueEstimateNumbers = [...new Set(selectedEstimateNumbers)];
+                    if (uniqueEstimateNumbers.length > 1) {
+                        alert('新增見積書失敗！所有選中的見積番号必須相同。');
+                        return;
+                    }
+
+                    var estimateNumber = uniqueEstimateNumbers[0];
+
+                    // 禁用按钮以防止重复提交
+                    $btn.prop('disabled', true);
+
                     $.ajax({
                         url: '/api/estimates/export',
                         type: 'POST',
                         contentType: 'application/json',
-                        data: JSON.stringify(selectedIds),
+                        data: JSON.stringify({ estimateIds: selectedIds, estimateNumber: estimateNumber }),
                         xhrFields: {
                             responseType: 'blob'
                         },
                         success: function(data) {
                             var link = document.createElement('a');
                             link.href = window.URL.createObjectURL(data);
-                            link.download = '見積書.xlsx';
+                            link.download = estimateNumber + '.xlsx';
                             link.click();
                         },
                         error: function(xhr, status, error) {
                             console.error(error);
                             alert('見積書導出失敗！');
+                        },
+                        complete: function() {
+                            // 在请求完成后重新启用按钮
+                            $btn.prop('disabled', false);
                         }
                     });
                 });
+
+
             },
             error: function(request, status, error) {
                 $('#content').html('<p>无法加载見積書数据。错误信息：' + request.responseText + '</p>');

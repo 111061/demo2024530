@@ -13,13 +13,16 @@ import java.util.Optional;
 import java.math.RoundingMode;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
-import java.io.ByteArrayOutputStream;
-import java.io.IOException;
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
-import java.io.InputStream;
+import java.io.IOException;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 @Service
 public class EstimateService {
+    private static final Logger logger = LoggerFactory.getLogger(EstimateService.class);
+
     private final EstimateRepository estimateRepository;
 
     @Autowired
@@ -117,29 +120,88 @@ public class EstimateService {
     public void exportEstimatesToExcel(String inputFilePath, String outputFilePath, List<Long> estimateIds) throws IOException {
         try (FileInputStream fis = new FileInputStream(inputFilePath);
              Workbook workbook = new XSSFWorkbook(fis)) {
-
             Sheet sheet = workbook.getSheetAt(0);
-            int lastRowNum = sheet.getLastRowNum();
+
+            // 设定要插入数据的起始行号和列号
+            int startRowNum = 23;  // 这里的23代表Excel中的第24行（因为索引从0开始）
+            int startColNum = 2;   // 这里的2代表Excel中的第C列
 
             // Fetch estimates and populate the rows
             List<Estimate> estimates = findEstimatesByIds(estimateIds);
-            for (Estimate estimate : estimates) {
-                Row row = sheet.createRow(++lastRowNum);
-                row.createCell(2).setCellValue(estimate.getOperatorName());
-                row.createCell(3).setCellValue(estimate.getTaskDescription());
-                row.createCell(4).setCellValue(estimate.getResponsiblePerson());
-                row.createCell(5).setCellValue(estimate.getApprover());
-                row.createCell(6).setCellValue(estimate.getTaskPeriodStart().toString());
-                row.createCell(7).setCellValue(estimate.getTaskPeriodEnd().toString());
-                row.createCell(8).setCellValue(estimate.getUnitPrice().toString());
-                row.createCell(9).setCellValue(estimate.getQuantity());
-                row.createCell(10).setCellValue(estimate.getSubtotal().toString());
+
+            // 获取模板行的单元格样式
+            Row templateRow = sheet.getRow(startRowNum - 1);
+            CellStyle templateStyle = null;
+            if (templateRow != null) {
+                Cell templateCell = templateRow.getCell(startColNum);
+                if (templateCell != null) {
+                    templateStyle = templateCell.getCellStyle();
+                }
             }
+
+            for (Estimate estimate : estimates) {
+                Row row = sheet.getRow(startRowNum);
+                if (row == null) {
+                    row = sheet.createRow(startRowNum);
+                }
+                createCellWithStyle(row, startColNum, estimate.getOperatorName(), templateStyle);
+                createCellWithStyle(row, startColNum + 1, estimate.getTaskDescription(), templateStyle);
+                String period = estimate.getTaskPeriodStart().toString() + " - " + estimate.getTaskPeriodEnd().toString();
+                createCellWithStyle(row, startColNum + 2, period, templateStyle);
+                createCellWithStyle(row, startColNum + 3, estimate.getUnitPrice().doubleValue(), templateStyle);
+                createCellWithStyle(row, startColNum + 4, estimate.getQuantity().doubleValue(), templateStyle);
+                createCellWithStyle(row, startColNum + 5, estimate.getSubtotal().doubleValue(), templateStyle);
+                startRowNum++;  // 每次循环后移到下一行
+            }
+
+            // 在 F14 单元格中插入指定的字符串
+            Row rowF14 = sheet.getRow(13); // F14对应的行号为13（从0开始计数）
+            if (rowF14 == null) {
+                rowF14 = sheet.createRow(13);
+            }
+            Cell cellF14 = rowF14.getCell(5); // F列对应的列号为5（从0开始计数）
+            if (cellF14 == null) {
+                cellF14 = rowF14.createCell(5);
+            }
+            cellF14.setCellValue("　　　　担当者：" + estimates.get(0).getResponsiblePerson() + "　　　　承認者：" + estimates.get(0).getApprover());
+
+            // 刷新公式
+            FormulaEvaluator evaluator = workbook.getCreationHelper().createFormulaEvaluator();
+            evaluator.evaluateAll();
 
             // Write the updated workbook to the output file
             try (FileOutputStream fos = new FileOutputStream(outputFilePath)) {
                 workbook.write(fos);
             }
+        } catch (IOException e) {
+            logger.error("Error exporting estimates to Excel", e);
+            throw new IOException("Error exporting estimates to Excel", e);
+        }
+    }
+
+    private void createCellWithStyle(Row row, int colIndex, Object value, CellStyle style) {
+        Cell cell = row.createCell(colIndex);
+        if (style != null) {
+            CellStyle newCellStyle = row.getSheet().getWorkbook().createCellStyle();
+            newCellStyle.cloneStyleFrom(style);
+            cell.setCellStyle(newCellStyle);
+
+            // 明确设置边框样式
+            newCellStyle.setBorderTop(BorderStyle.THIN);
+            newCellStyle.setBorderBottom(BorderStyle.THIN);
+            newCellStyle.setBorderLeft(BorderStyle.THIN);
+            newCellStyle.setBorderRight(BorderStyle.THIN);
+        }
+        if (value instanceof String) {
+            cell.setCellValue((String) value);
+        } else if (value instanceof BigDecimal) {
+            cell.setCellValue(((BigDecimal) value).doubleValue());
+        } else if (value instanceof Integer) {
+            cell.setCellValue((Integer) value);
+        } else if (value instanceof Double) {
+            cell.setCellValue((Double) value);
+        } else {
+            cell.setCellValue(value.toString());
         }
     }
 }
