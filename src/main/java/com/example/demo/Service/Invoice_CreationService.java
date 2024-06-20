@@ -4,15 +4,13 @@ import com.example.demo.DTO.Contract_Management_Screen;
 import com.example.demo.DTO.Invoice_Creation;
 import com.example.demo.DTO.Invoice_CreationRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.io.ClassPathResource;
 import org.springframework.stereotype.Service;
+
+import java.io.*;
 import java.io.IOException;
-import java.io.FileOutputStream;
 import java.time.LocalDate;
 import java.time.format.DateTimeFormatter;
-import java.io.FileInputStream;
-import java.io.ByteArrayInputStream;
-import java.io.ByteArrayOutputStream;
-import java.io.OutputStreamWriter;
 import java.lang.*;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
@@ -48,6 +46,7 @@ public class Invoice_CreationService {
 
     public byte[] exportInvoiceById(Long id) {
         ByteArrayOutputStream byteArrayOutputStream = new ByteArrayOutputStream();
+        Workbook workbook = null;
         try {
             Invoice_Creation invoiceCreation = invoiceCreationRepository.findById(id)
                     .orElseThrow(() -> new RuntimeException("Invoice not found"));
@@ -59,9 +58,10 @@ public class Invoice_CreationService {
             double total = settlementValue+unit_price;
 
 
-            String templateFilePath = "C:\\Users\\www\\IdeaProjects\\demo\\請求書テンプレート.xlsx";
-            FileInputStream fis = new FileInputStream(templateFilePath);
-            Workbook workbook = new XSSFWorkbook(fis);
+            ClassPathResource resource = new ClassPathResource("template/請求書テンプレート.xlsx");
+            try (InputStream fis = resource.getInputStream()) {
+                workbook = new XSSFWorkbook(fis);
+            }
             Sheet sheet = workbook.getSheetAt(0);
 
             // Update specific cells with invoiceCreation data

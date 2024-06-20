@@ -46,9 +46,12 @@ public class Invoice_CreationController {
         try {
             logger.info("Exporting invoice with ID: " + id);
             byte[] data = invoiceCreationService.exportInvoiceById(id);
+            Invoice_Creation invoice = invoiceCreationService.findInvoiceCreationById(id);
+            String engineer = invoice.getEngineer();
+            String fileName = engineer + ".xlsx";
             HttpHeaders headers = new HttpHeaders();
             headers.setContentType(MediaType.APPLICATION_OCTET_STREAM);
-            headers.add(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=invoice_" + id + ".xlsx");
+            headers.add(HttpHeaders.CONTENT_DISPOSITION, "attachment; filename=\"" + fileName + "\"");
 
             return new ResponseEntity<>(data, headers, HttpStatus.OK);
         } catch (Exception e) {
