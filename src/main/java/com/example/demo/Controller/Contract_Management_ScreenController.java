@@ -123,7 +123,9 @@ public class Contract_Management_ScreenController {
         }
     }
     //xsl連接
-    private final Path fileStorageLocation = Paths.get("C:\\Users\\a1044\\IdeaProjects\\demo2024530\\Estimate").toAbsolutePath().normalize();
+    String projectRoot = System.getProperty("user.dir");
+
+    private final Path fileStorageLocation = Paths.get(projectRoot, "Estimate").toAbsolutePath().normalize();
 
     @GetMapping("/download")
     public ResponseEntity<Resource> downloadFile(@RequestParam String fileName) {

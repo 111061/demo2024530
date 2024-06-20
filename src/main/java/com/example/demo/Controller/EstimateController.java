@@ -14,6 +14,7 @@ import java.io.File;
 import java.nio.file.Files;
 import com.example.demo.DTO.EstimateRepository;
 import java.util.stream.Collectors;
+import java.nio.file.Paths;
 @RestController
 @RequestMapping("/api/estimates")
 public class EstimateController {
@@ -58,8 +59,14 @@ public class EstimateController {
         String estimateNumber = exportRequest.getEstimateNumber();
         List<Long> estimateIds = exportRequest.getEstimateIds();
 
-        String inputFilePath = "C:\\Users\\a1044\\IdeaProjects\\demo2024530\\見積書.xlsx";
-        String outputFilePath = "C:\\Users\\a1044\\IdeaProjects\\demo2024530\\Estimate\\" + estimateNumber + ".xlsx";
+        // 获取项目的根目录
+        String projectRoot = System.getProperty("user.dir");
+
+        // 构建相对路径
+        String inputFilePath = Paths.get(projectRoot,  "見積書.xlsx").toString();
+        String outputFilePath = Paths.get(projectRoot, "Estimate", estimateNumber + ".xlsx").toString();
+
+        System.out.print(inputFilePath+"..."+outputFilePath);
 
         try {
             estimateService.exportEstimatesToExcel(inputFilePath, outputFilePath, estimateIds);
