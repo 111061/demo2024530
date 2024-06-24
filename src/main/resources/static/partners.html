@@ -53,7 +53,7 @@
 
         <main class="col-md-10 ml-sm-auto col-lg-10 pt-3 px-4">
             <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pb-2 mb-3 border-bottom">
-                <h1 class="h2">信箱管理列表</h1>
+                <h1 class="h2">合作夥伴管理列表</h1>
                 <div class="email-authentication-form d-flex align-items-center">
                     <div class="me-2">
                         <label for="email-account" class="visually-hidden">郵件帳號</label>
@@ -94,8 +94,8 @@
                     partnersContent += '<table class="table">';
                     partnersContent += '<thead><tr><th><input type="checkbox" id="select-all-partners"></th><th>公司ID</th><th>公司名稱</th><th>銷售代表</th><th>郵箱</th><th>操作</th></tr></thead><tbody>';
                     $.each(partners, function(index, partner) {
-                        partnersContent += '<tr><td><input type="checkbox" class="partner-checkbox" data-email="' + partner.mail + '"></td><td>' + partner.comId + '</td><td>' + partner.company + '</td><td>' + partner.salesRep + '</td><td>' + partner.mail + '</td>';
-                        partnersContent += '<td class="operation-buttons"><button class="btn btn-info btn-sm">變更</button></td></tr>';
+                        partnersContent += '<tr data-id="' + partner.comId + '"><td><input type="checkbox" class="partner-checkbox" data-email="' + partner.mail + '"></td><td>' + partner.comId + '</td><td>' + partner.company + '</td><td>' + partner.salesRep + '</td><td>' + partner.mail + '</td>';
+                        partnersContent += '<td class="operation-buttons"><button class="btn btn-info btn-sm edit-partner">變更</button></td></tr>';
                     });
 
                     partnersContent += '</tbody></table>';
@@ -153,9 +153,29 @@
 
         $(document).on('click', '#delete-selected-partners', function() {
             var selectedCheckboxes = $('.partner-checkbox:checked');
+            var selectedIds = [];
             selectedCheckboxes.each(function() {
-                alert('刪除按鈕成功！');
+                var partnerId = $(this).closest('tr').data('id');
+                selectedIds.push(partnerId);
             });
+            var confirmation = confirm("确定要批量删除所选合作夥伴吗？");
+            if (confirmation) {
+                $.ajax({
+                    url: '/api/partners/delete',
+                    type: 'DELETE',
+                    contentType: 'application/json',
+                    data: JSON.stringify(selectedIds),
+                    success: function(response) {
+                        alert('删除成功');
+                        location.reload();
+                    },
+                    error: function(xhr, status, error) {
+                        alert('删除失败');
+                    }
+                });
+            } else {
+                alert('已取消');
+            }
             $('.partner-checkbox:checked').prop('checked', false).trigger('change');
         });
 
@@ -179,7 +199,7 @@
             };
 
             $.ajax({
-                url: '/api/employees/sendEmails',
+                url: '/api/partners/sendEmails',
                 type: 'POST',
                 contentType: 'application/json',
                 data: JSON.stringify(emailDetails),
@@ -193,6 +213,48 @@
                 }
             });
         });
+
+        // 编辑合作夥伴信息
+        $(document).on('click', '.edit-partner', function() {
+            var row = $(this).closest('tr');
+            var partnerId = row.data('id');
+            var company = row.find('td:eq(2)').text();
+            var salesRep = row.find('td:eq(3)').text();
+            var mail = row.find('td:eq(4)').text();
+
+            // Convert row to editable fields
+            row.find('td:eq(2)').html('<input type="text" class="form-control" value="' + company + '">');
+            row.find('td:eq(3)').html('<input type="text" class="form-control" value="' + salesRep + '">');
+            row.find('td:eq(4)').html('<input type="text" class="form-control" value="' + mail + '">');
+
+            // Change button to save button
+            $(this).removeClass('edit-partner').addClass('save-partner').text('保存');
+        });
+
+        $(document).on('click', '.save-partner', function() {
+            var row = $(this).closest('tr');
+            var partnerId = row.data('id');
+            var partnerData = {
+                company: row.find('td:eq(2) input').val(),
+                salesRep: row.find('td:eq(3) input').val(),
+                mail: row.find('td:eq(4) input').val()
+            };
+
+            $.ajax({
+                url: '/api/partners/update/' + partnerId,
+                type: 'PUT',
+                contentType: 'application/json',
+                data: JSON.stringify(partnerData),
+                success: function(data) {
+                    alert('合作夥伴更新成功！');
+                    fetchPartners();
+                },
+                error: function(error) {
+                    alert('合作夥伴更新失敗！');
+                }
+            });
+        });
+
     });
 </script>
 

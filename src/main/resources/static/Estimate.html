@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>SEC事務管理系統 - 見積書作成</title>
     <link rel="stylesheet" href="css/bootstrap.min.css">
+    <link href="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/css/select2.min.css" rel="stylesheet" />
     <style>
         .sidebar {
             min-height: 100vh;
@@ -94,8 +95,34 @@
 <script src="https://code.jquery.com/jquery-3.6.0.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.14.7/umd/popper.min.js"></script>
 <script src="js/bootstrap.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/select2@4.1.0-rc.0/dist/js/select2.min.js"></script>
 <script>
 $(document).ready(function() {
+    function fetchEmployees() {
+        $.ajax({
+            url: '/api/employees/test',
+            type: 'GET',
+            dataType: 'json',
+            success: function(employees) {
+                var seenNames = new Set();
+                var options = '<option value="">選擇作業者</option>';
+                $.each(employees, function(index, employee) {
+                    if (!seenNames.has(employee.name)) {
+                        options += '<option value="' + employee.name + '">' + employee.name + '</option>';
+                        seenNames.add(employee.name);
+                    }
+                });
+                $('#operator-name').html(options).select2({
+                    placeholder: '選擇作業者',
+                    allowClear: true
+                });
+            },
+            error: function(request, status, error) {
+                console.error('无法获取员工数据。错误信息：', request.responseText);
+            }
+        });
+    }
+
     function fetchEstimates(searchParams = {}, selectIds = []) {
         $.ajax({
             url: '/api/estimates/search',
@@ -107,7 +134,7 @@ $(document).ready(function() {
                 estimatesContent += '<div id="add-estimate-form" style="margin-bottom: 15px;">';
                 estimatesContent += '<div class="form-row">';
                 estimatesContent += '<input type="text" id="estimate-number" placeholder="見積番号" class="form-control">';
-                estimatesContent += '<input type="text" id="operator-name" placeholder="作業者名" class="form-control">';
+                estimatesContent += '<select id="operator-name" class="form-control"></select>';
                 estimatesContent += '<input type="text" id="task-description" placeholder="任務描述" class="form-control">';
                 estimatesContent += '<input type="text" id="responsible-person" placeholder="擔當者" class="form-control">';
                 estimatesContent += '<input type="text" id="approver" placeholder="承認者" class="form-control">';
@@ -230,7 +257,7 @@ $(document).ready(function() {
 
                     // Convert row to editable fields
                     row.find('td:eq(2)').html('<input type="text" class="form-control" value="' + estimateNumber + '">');
-                    row.find('td:eq(3)').html('<input type="text" class="form-control" value="' + operatorName + '">');
+                    row.find('td:eq(3)').html('<select class="form-control"></select>');
                     row.find('td:eq(4)').html('<input type="text" class="form-control" value="' + taskDescription + '">');
                     row.find('td:eq(5)').html('<input type="text" class="form-control" value="' + responsiblePerson + '">');
                     row.find('td:eq(6)').html('<input type="text" class="form-control" value="' + approver + '">');
@@ -245,6 +272,12 @@ $(document).ready(function() {
                         row.find('td:eq(11) input').val((updatedUnitPrice * updatedQuantity).toFixed(2));
                     });
 
+                    row.find('td:eq(3) select').html($('#operator-name').html()).select2({
+                        placeholder: '選擇作業者',
+                        allowClear: true
+                    });
+                    row.find('td:eq(3) select').val(operatorName);
+
                     // Change button to save button
                     $(this).removeClass('edit-estimate').addClass('save-estimate').text('保存');
                 });
@@ -254,7 +287,7 @@ $(document).ready(function() {
                     var estimateId = row.data('id');
                     var estimateData = {
                         estimateNumber: row.find('td:eq(2) input').val(),
-                        operatorName: row.find('td:eq(3) input').val(),
+                        operatorName: row.find('td:eq(3) select').val(),
                         taskDescription: row.find('td:eq(4) input').val(),
                         responsiblePerson: row.find('td:eq(5) input').val(),
                         approver: row.find('td:eq(6) input').val(),
@@ -419,7 +452,8 @@ $(document).ready(function() {
                     });
                 });
 
-
+                // Fetch employees on page load
+                fetchEmployees();
             },
             error: function(request, status, error) {
                 $('#content').html('<p>无法加载見積書数据。错误信息：' + request.responseText + '</p>');
