@@ -11,7 +11,6 @@ import com.example.demo.Service.EmailService;
 import com.example.demo.DTO.EmailDetails;
 
 @RestController
-
 @RequestMapping("/api/employees")
 public class EmployeeController {
 
@@ -32,8 +31,8 @@ public class EmployeeController {
         } catch (Exception e) {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
-
     }
+
     // 根据姓名查询员工
     @GetMapping("/test/name/{name}")
     public ResponseEntity<List<Employee>> getEmployeeByName(@PathVariable String name) {
@@ -48,6 +47,7 @@ public class EmployeeController {
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
     }
+
     // 添加一个新员工
     @PostMapping("/add")
     public ResponseEntity<Employee> addEmployee(@RequestBody Employee employee) {
@@ -60,21 +60,42 @@ public class EmployeeController {
         }
     }
 
-    //批量删除员工
+    // 批量删除员工
     @DeleteMapping("/delete")
-    public ResponseEntity<List<Employee>> deleteEmployee(@RequestBody List<Long> employeeIds){
+    public ResponseEntity<List<Employee>> deleteEmployee(@RequestBody List<Long> employeeIds) {
         try {
             for (Long employeeId : employeeIds) {
                 employeeService.deleteEmployeeById(employeeId);
             }
             return new ResponseEntity<>(HttpStatus.OK);
-
         } catch (Exception e) {
             // 日志记录异常信息
             return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
         }
-
     }
+
+    // 更新員工資料
+    @PutMapping("/update/{id}")
+    public ResponseEntity<Employee> updateEmployee(@PathVariable Long id, @RequestBody Employee employee) {
+        try {
+            Employee existingEmployee = employeeService.findEmployeeById(id);
+            if (existingEmployee == null) {
+                return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+            }
+            existingEmployee.setName(employee.getName());
+            existingEmployee.setGender(employee.getGender());
+            existingEmployee.setBirthday(employee.getBirthday());
+            existingEmployee.setMail(employee.getMail());
+            existingEmployee.setTel(employee.getTel());
+            existingEmployee.setAddress(employee.getAddress());
+
+            Employee updatedEmployee = employeeService.addEmployee(existingEmployee);
+            return new ResponseEntity<>(updatedEmployee, HttpStatus.OK);
+        } catch (Exception e) {
+            return new ResponseEntity<>(null, HttpStatus.INTERNAL_SERVER_ERROR);
+        }
+    }
+
     // 群发邮件
     @PostMapping("/sendEmails")
     public ResponseEntity<?> sendEmailsToEmployees(@RequestBody EmailDetails details) {
@@ -94,6 +115,4 @@ public class EmployeeController {
             return new ResponseEntity<>("Error sending emails", HttpStatus.INTERNAL_SERVER_ERROR);
         }
     }
-
-
 }

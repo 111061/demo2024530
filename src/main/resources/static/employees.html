@@ -84,21 +84,21 @@
                 type: 'GET',
                 success: function(employees) {
                     var employeesContent = '<h2>員工列表</h2>';
-                    employeesContent +='<div id="add-employee-form" style="margin-bottom: 15px;">'
-                    employeesContent +='<input type="text" id="employee-name" placeholder="名字">'
-                    employeesContent +='<input type="text" id="employee-gender" placeholder="性别">'
-                    employeesContent +=' <input type="text" id="employee-birthday" placeholder="生日">'
-                    employeesContent +='<input type="text" id="employee-mail" placeholder="邮箱">'
-                    employeesContent +='<input type="text" id="employee-tel" placeholder="电话">'
-                    employeesContent +='<input type="text" id="employee-address" placeholder="地址">'
+                    employeesContent += '<div id="add-employee-form" style="margin-bottom: 15px;">'
+                    employeesContent += '<input type="text" id="employee-name" placeholder="名字">'
+                    employeesContent += '<input type="text" id="employee-gender" placeholder="性别">'
+                    employeesContent += ' <input type="text" id="employee-birthday" placeholder="生日">'
+                    employeesContent += '<input type="text" id="employee-mail" placeholder="邮箱">'
+                    employeesContent += '<input type="text" id="employee-tel" placeholder="电话">'
+                    employeesContent += '<input type="text" id="employee-address" placeholder="地址">'
                     employeesContent += '<button id="add-employee-btn" class="btn btn-primary">新增员工</button>';
                     employeesContent += '</div>'
                     employeesContent += '<table class="table">';
                     employeesContent += '<thead><tr><th><input type="checkbox" id="select-all-employees"></th><th>ID</th><th>名字</th><th>性別</th><th>生日</th><th>郵箱</th><th>電話</th><th>地址</th><th>操作</th></tr></thead><tbody>';
 
                     $.each(employees, function(index, employee) {
-                        employeesContent += '<tr><td><input type="checkbox" class="employee-checkbox"data-email="' + employee.mail + '"></td><td>' + employee.employeeId + '</td><td>' + employee.name + '</td><td>' + employee.gender + '</td><td>' + employee.birthday + '</td><td>' + employee.mail + '</td><td>' + employee.tel + '</td><td>' + employee.address + '</td>';
-                        employeesContent += '<td class="operation-buttons"><button class="btn btn-info btn-sm">變更</button></td></tr>';
+                        employeesContent += '<tr data-id="' + employee.employeeId + '"><td><input type="checkbox" class="employee-checkbox"data-email="' + employee.mail + '"></td><td>' + employee.employeeId + '</td><td>' + employee.name + '</td><td>' + employee.gender + '</td><td>' + employee.birthday + '</td><td>' + employee.mail + '</td><td>' + employee.tel + '</td><td>' + employee.address + '</td>';
+                        employeesContent += '<td class="operation-buttons"><button class="btn btn-info btn-sm edit-employee">變更</button></td></tr>';
                     });
 
                     employeesContent += '</tbody></table>';
@@ -162,7 +162,7 @@
             var selectedCheckboxes = $('.employee-checkbox:checked');
             var selectedIds = [];
             selectedCheckboxes.each(function() {
-                var employeeId = $(this).closest('tr').find('td:eq(1)').text();
+                var employeeId = $(this).closest('tr').data('id');
                 selectedIds.push(employeeId);
             });
             var confirmation = confirm("确定要批量删除所选员工吗？");
@@ -217,6 +217,56 @@
                 error: function(xhr, status, error) {
                     console.error(error);
                     alert('邮件发送失败！');
+                }
+            });
+        });
+
+        // 添加编辑员工功能
+        $(document).on('click', '.edit-employee', function() {
+            var row = $(this).closest('tr');
+            var employeeId = row.data('id');
+            var name = row.find('td:eq(2)').text();
+            var gender = row.find('td:eq(3)').text();
+            var birthday = row.find('td:eq(4)').text();
+            var mail = row.find('td:eq(5)').text();
+            var tel = row.find('td:eq(6)').text();
+            var address = row.find('td:eq(7)').text();
+
+            // Convert row to editable fields
+            row.find('td:eq(2)').html('<input type="text" class="form-control" value="' + name + '">');
+            row.find('td:eq(3)').html('<input type="text" class="form-control" value="' + gender + '">');
+            row.find('td:eq(4)').html('<input type="date" class="form-control" value="' + birthday + '">');
+            row.find('td:eq(5)').html('<input type="email" class="form-control" value="' + mail + '">');
+            row.find('td:eq(6)').html('<input type="text" class="form-control" value="' + tel + '">');
+            row.find('td:eq(7)').html('<input type="text" class="form-control" value="' + address + '">');
+
+            // Change button to save button
+            $(this).removeClass('edit-employee').addClass('save-employee').text('保存');
+        });
+
+        $(document).on('click', '.save-employee', function() {
+            var row = $(this).closest('tr');
+            var employeeId = row.data('id');
+            var employeeData = {
+                name: row.find('td:eq(2) input').val(),
+                gender: row.find('td:eq(3) input').val(),
+                birthday: row.find('td:eq(4) input').val(),
+                mail: row.find('td:eq(5) input').val(),
+                tel: row.find('td:eq(6) input').val(),
+                address: row.find('td:eq(7) input').val()
+            };
+
+            $.ajax({
+                url: '/api/employees/update/' + employeeId,
+                type: 'PUT',
+                contentType: 'application/json',
+                data: JSON.stringify(employeeData),
+                success: function(data) {
+                    alert('員工更新成功！');
+                    fetchEmployees();
+                },
+                error: function(error) {
+                    alert('員工更新失敗！');
                 }
             });
         });
