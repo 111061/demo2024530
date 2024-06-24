@@ -16,14 +16,17 @@ public class Order {
     private String contractingCompany;
     private String projectName;
     private String subcontractorSales;
-    private BigDecimal unitPrice;
+    private String job_details;
+    private String work_place;
+    private Double person_month;
+    private Double unitPrice;
     private String paymentTerms;
-    private BigDecimal settlement;
-    private BigDecimal settlementLowerLimit;
-    private BigDecimal settlementUpperLimit;
-    private BigDecimal overtimeUnitPrice;
-    private BigDecimal deductionUnitPrice;
-    private BigDecimal settlementTimeUnit;
+    private Double settlement;
+    private Double settlementLowerLimit;
+    private Double settlementUpperLimit;
+    private Double overtimeUnitPrice;
+    private Double deductionUnitPrice;
+    private Double settlementTimeUnit;
     private String dailyRateSetting;
     private String entryDate;
     private String expectedExitDate;
@@ -33,13 +36,16 @@ public class Order {
     }
 
     // Constructor with parameters
-    public Order(Long id, String subcontractor, String engineer, String contractingCompany, String projectName, String subcontractorSales, BigDecimal unitPrice, String paymentTerms, BigDecimal settlement, BigDecimal settlementLowerLimit, BigDecimal settlementUpperLimit, BigDecimal overtimeUnitPrice, BigDecimal deductionUnitPrice, BigDecimal settlementTimeUnit, String dailyRateSetting, String entryDate, String expectedExitDate) {
+    public Order(Long id, String subcontractor, String engineer, String contractingCompany, String projectName, String subcontractorSales,String job_details,String work_place,Double person_month, Double unitPrice, String paymentTerms, Double settlement, Double settlementLowerLimit, Double settlementUpperLimit, Double overtimeUnitPrice, Double deductionUnitPrice, Double settlementTimeUnit, String dailyRateSetting, String entryDate, String expectedExitDate) {
         this.id = id;
         this.subcontractor = subcontractor;
         this.engineer = engineer;
         this.contractingCompany = contractingCompany;
         this.projectName = projectName;
         this.subcontractorSales = subcontractorSales;
+        this.job_details = job_details;
+        this.work_place = work_place;
+        this.person_month = person_month;
         this.unitPrice = unitPrice;
         this.paymentTerms = paymentTerms;
         this.settlement = settlement;
@@ -62,6 +68,9 @@ public class Order {
                 ", contractingCompany='" + contractingCompany + '\'' +
                 ", projectName=" + projectName +
                 ", subcontractorSales='" + subcontractorSales + '\'' +
+                ", job_details='" + job_details + '\'' +
+                ", work_place='" + work_place + '\'' +
+                ", person_month='" + person_month + '\'' +
                 ", unitPrice='" + unitPrice + '\'' +
                 ", paymentTerms='" + paymentTerms + '\'' +
                 ", settlement=" + settlement +
@@ -124,11 +133,23 @@ public class Order {
         this.subcontractorSales = subcontractorSales;
     }
 
-    public BigDecimal getUnitPrice() {
+    public String getJob_details() {return job_details;}
+
+    public  void setJob_details(String job_details) {this.job_details = job_details;}
+
+    public String getWork_place() {return work_place;}
+
+    public void setWork_place(String work_place) {this.work_place = work_place;}
+
+    public Double getPerson_month() {return person_month;}
+
+    public void setPerson_month(Double person_month) {this.person_month = person_month;}
+
+    public Double getUnitPrice() {
         return unitPrice;
     }
 
-    public void setUnitPrice(BigDecimal unitPrice) {
+    public void setUnitPrice(Double unitPrice) {
         this.unitPrice = unitPrice;
     }
 
@@ -140,51 +161,51 @@ public class Order {
         this.paymentTerms = paymentTerms;
     }
 
-    public BigDecimal getSettlement() {
+    public Double getSettlement() {
         return settlement;
     }
 
-    public void setSettlement(BigDecimal settlement) {
+    public void setSettlement(Double settlement) {
         this.settlement = settlement;
     }
 
-    public BigDecimal getSettlementLowerLimit() {
+    public Double getSettlementLowerLimit() {
         return settlementLowerLimit;
     }
 
-    public void setSettlementLowerLimit(BigDecimal settlementLowerLimit) {
+    public void setSettlementLowerLimit(Double settlementLowerLimit) {
         this.settlementLowerLimit = settlementLowerLimit;
     }
 
-    public BigDecimal getSettlementUpperLimit() {
+    public Double getSettlementUpperLimit() {
         return settlementUpperLimit;
     }
 
-    public void setSettlementUpperLimit(BigDecimal settlementUpperLimit) {
+    public void setSettlementUpperLimit(Double settlementUpperLimit) {
         this.settlementUpperLimit = settlementUpperLimit;
     }
 
-    public BigDecimal getOvertimeUnitPrice() {
+    public Double getOvertimeUnitPrice() {
         return overtimeUnitPrice;
     }
 
-    public void setOvertimeUnitPrice(BigDecimal overtimeUnitPrice) {
+    public void setOvertimeUnitPrice(Double overtimeUnitPrice) {
         this.overtimeUnitPrice = overtimeUnitPrice;
     }
 
-    public BigDecimal getDeductionUnitPrice() {
+    public Double getDeductionUnitPrice() {
         return deductionUnitPrice;
     }
 
-    public void setDeductionUnitPrice(BigDecimal deductionUnitPrice) {
+    public void setDeductionUnitPrice(Double deductionUnitPrice) {
         this.deductionUnitPrice = deductionUnitPrice;
     }
 
-    public BigDecimal getSettlementTimeUnit() {
+    public Double getSettlementTimeUnit() {
         return settlementTimeUnit;
     }
 
-    public void setSettlementTimeUnit(BigDecimal settlementTimeUnit) {
+    public void setSettlementTimeUnit(Double settlementTimeUnit) {
         this.settlementTimeUnit = settlementTimeUnit;
     }
 

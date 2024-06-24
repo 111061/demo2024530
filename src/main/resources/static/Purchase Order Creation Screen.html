@@ -20,6 +20,18 @@
         .table th, .table td {
             font-size: 1.2rem;
         }
+        .form-row {
+            display: flex;
+            flex-wrap: nowrap;
+            align-items: center;
+        }
+        .form-row > * {
+            flex: 1;
+            margin-right: 10px;
+        }
+        .form-row > *:last-child {
+            margin-right: 0;
+        }
     </style>
 </head>
 <body>
@@ -69,6 +81,13 @@
             <div id="content">
                 <!-- 合作夥伴列表內容 -->
             </div>
+
+            <!-- 全局操作按钮 -->
+            <div id="global-operation-buttons" style="margin-top: 15px; display: none;">
+                <button id="export-order-btn" class="btn btn-secondary btn-sm me-2">輸出注文書</button>
+                <button id="delete-selected-orders" class="btn btn-danger btn-sm me-2">刪除選定</button>
+                <button id="send-mail-to-orders-btn" class="btn btn-secondary btn-sm">發送郵件</button>
+            </div>
         </main>
     </div>
 </div>
@@ -78,34 +97,48 @@
 <script src="js/bootstrap.min.js"></script>
 <script>
     $(document).ready(function() {
-        function fetchPartners() {
+        function fetchOrders() {
             $.ajax({
                 url: '/api/orders/test',
                 type: 'GET',
                 dataType: 'json',
                 success: function(orders) {
-                    var partnersContent = '<h2>注文書作成</h2>';
-                    partnersContent += '<div id="add-partner-form" style="margin-bottom: 15px;">';
-                    partnersContent += '<input type="text" id="partner-company" placeholder="公司名称">';
-                    partnersContent += '<input type="text" id="partner-salesRep" placeholder="销售代表">';
-                    partnersContent += '<input type="text" id="partner-mail" placeholder="邮箱">';
-                    partnersContent += '<button id="add-partner-btn" class="btn btn-primary">注文情報追加</button>';
-                    partnersContent += '</div>';
-                    partnersContent += '<table class="table">';
-                    partnersContent += '<thead><tr><th><input type="checkbox" id="select-all-partners"></th><th>下請企業</th><th>エンジニア</th><th>契約会社</th><th>プロジェクト名</th><th>下位営業</th><th>単価</th><th>支払サイト</th><th>積算</th><th>積算下限</th><th>積算下限</th><th>超過単価</th><th>控除単価</th><th>積算時間単位</th><th>日割設定</th><th>入場日</th><th>退場予定日</th><th>操作</th></tr></thead><tbody>';
+                    var ordersContent = '<h2>注文書作成</h2>';
+                    ordersContent += '<div id="add-order-form" style="margin-bottom: 15px;">';
+                    ordersContent += '<input type="text" id="subcontractor" placeholder="下請企業">';
+                    ordersContent += '<input type="text" id="engineer" placeholder="エンジニア">';
+                    ordersContent += '<input type="text" id="contractingCompany" placeholder="契約会社">';
+                    ordersContent += '<input type="text" id="projectName" placeholder="プロジェクト名">';
+                    ordersContent += '<input type="text" id="subcontractorSales" placeholder="下位営業">';
+                    ordersContent += '<input type="text" id="job_details" placeholder="作業内容">';
+                    ordersContent += '<input type="text" id="work_place" placeholder="作業が場所">';
+                    ordersContent += '<input type="text" id="person_month" placeholder="人月">';
+                    ordersContent += '<input type="text" id="unitPrice" placeholder="単価">';
+                    ordersContent += '<input type="text" id="paymentTerms" placeholder="支払条件">';
+                    ordersContent += '<input type="text" id="settlement" placeholder="精算">';
+                    ordersContent += '<input type="text" id="settlementLowerLimit" placeholder="精算下限">';
+                    ordersContent += '<input type="text" id="settlementUpperLimit" placeholder="精算上限">';
+                    ordersContent += '<input type="text" id="overtimeUnitPrice" placeholder="超過単価">';
+                    ordersContent += '<input type="text" id="deductionUnitPrice" placeholder="控除単価">';
+                    ordersContent += '<input type="text" id="settlementTimeUnit" placeholder="精算時間単位">';
+                    ordersContent += '<input type="text" id="dailyRateSetting" placeholder="日割設定">';
+                    ordersContent += '<input type="date" id="entryDate" placeholder="入場日">';
+                    ordersContent += '<input type="date" id="expectedExitDate" placeholder="退場予定日">';
+                    ordersContent += '<button id="add-order-btn" class="btn btn-primary">注文情報追加</button>';
+                    ordersContent += '</div>';
+                    ordersContent += '<table class="table">';
+                    ordersContent += '<thead><tr><th><input type="checkbox" id="select-all-orders"></th><th>下請企業</th><th>エンジニア</th><th>契約会社</th><th>プロジェクト名</th><th>下位営業</th><th>作業内容</th><th>作業場所</th><th>人月</th><th>単価</th><th>支払条件</th><th>積算</th><th>積算下限</th><th>積算上限</th><th>超過単価</th><th>控除単価</th><th>積算時間単位</th><th>日割設定</th><th>入場日</th><th>退場予定日</th><th>操作</th></tr></thead><tbody>';
                     $.each(orders, function(index, order) {
-                        partnersContent += '<tr data-id="' + order.id + '"><td><input type="checkbox" class="order-checkbox" data-email="' + order.id + '"></td><td>' + order.subcontractor + '</td><td>' + order.engineer + '</td><td>' + order.contractingCompany + '</td><td>' + order.projectName + '</td><td>' + order.subcontractorSales + '</td><td>' + order.unitPrice + '</td><td>' + order.paymentTerms + '</td><td>' + order.settlement + '</td><td>' + order.settlementLowerLimit + '</td><td>' + order.settlementUpperLimit + '</td><td>' + order.overtimeUnitPrice + '</td><td>' + order.deductionUnitPrice + '</td><td>' + order.settlementTimeUnit + '</td><td>' + order.dailyRateSetting + '</td><td>' + order.entryDate + '</td><td>' + order.expectedExitDate + '</td>';
-                        partnersContent += '<td class="operation-buttons"><button class="btn btn-info btn-sm edit-order">變更</button></td></tr>';
+                        ordersContent += '<tr data-id="' + order.id + '"><td><input type="checkbox" class="order-checkbox" data-email="' + order.id + '"></td><td>' + order.subcontractor + '</td><td>' + order.engineer + '</td><td>' + order.contractingCompany + '</td><td>' + order.projectName + '</td><td>' + order.subcontractorSales + '</td><td>' + order.job_details + '</td><td>' + order.work_place + '</td><td>' + order.person_month + '</td><td>' + order.unitPrice + '</td><td>' + order.paymentTerms + '</td><td>' + order.settlement + '</td><td>' + order.settlementLowerLimit + '</td><td>' + order.settlementUpperLimit + '</td><td>' + order.overtimeUnitPrice + '</td><td>' + order.deductionUnitPrice + '</td><td>' + order.settlementTimeUnit + '</td><td>' + order.dailyRateSetting + '</td><td>' + order.entryDate + '</td><td>' + order.expectedExitDate + '</td>';
+                        ordersContent += '<td class="operation-buttons"><button class="btn btn-info btn-sm edit-order">變更</button></td></tr>';
                     });
 
-                    partnersContent += '</tbody></table>';
-                    partnersContent += '<div id="send-mail-to-partners-form" style="margin-top: 15px;">';
-                    partnersContent += '<h3>發送郵件給合作夥伴</h3>';
-                    partnersContent += '<input type="text" id="partner-mail-subject" placeholder="主題" class="form-control">';
-                    partnersContent += '<textarea id="partner-mail-body" placeholder="內容" class="form-control" rows="4"></textarea>';
-                    partnersContent += '<button id="delete-selected-partners" class="btn btn-danger btn-sm mt-2 me-2" style="display:none;">刪除選定</button>';
-                    partnersContent += '<button id="send-mail-to-partners-btn" class="btn btn-secondary btn-sm mt-2" style="display:none;">發送郵件</button>';
-                    $('#content').html(partnersContent);
+                    ordersContent += '</tbody></table>';
+
+                    $('#content').html(ordersContent);
+
+                    $('#global-operation-buttons').hide();
+                    $('#select-all-orders').prop('checked', false);
                 },
                 error: function(request, status, error) {
                     $('#content').html('<p>无法加载合作夥伴数据。错误信息：' + request.responseText + '</p>');
@@ -113,58 +146,93 @@
             });
         }
 
-        fetchPartners();
+        fetchOrders();
 
-        $(document).on('click', '#add-partner-btn', function() {
-            var partnerData = {
-                company: $('#partner-company').val(),
-                salesRep: $('#partner-salesRep').val(),
-                mail: $('#partner-mail').val()
+        $(document).on('click', '#add-order-btn', function() {
+            var orderData = {
+                subcontractor: $('#subcontractor').val(),
+                engineer: $('#engineer').val(),
+                contractingCompany: $('#contractingCompany').val(),
+                projectName: $('#projectName').val(),
+                subcontractorSales: $('#subcontractorSales').val(),
+                job_details: $('#job_details').val(),
+                work_place: $('#work_place').val(),
+                person_month: $('#person_month').val(),
+                unitPrice: $('#unitPrice').val(),
+                paymentTerms: $('#paymentTerms').val(),
+                settlement: $('#settlement').val(),
+                settlementLowerLimit: $('#settlementLowerLimit').val(),
+                settlementUpperLimit: $('#settlementUpperLimit').val(),
+                overtimeUnitPrice: $('#overtimeUnitPrice').val(),
+                deductionUnitPrice: $('#deductionUnitPrice').val(),
+                settlementTimeUnit: $('#settlementTimeUnit').val(),
+                dailyRateSetting: $('#dailyRateSetting').val(),
+                entryDate: $('#entryDate').val(),
+                expectedExitDate: $('#expectedExitDate').val()
             };
-            if (!partnerData.company || !partnerData.salesRep || !partnerData.mail) {
-                alert('新增合作夥伴失敗！所有欄位都必須填寫。');
+            if (!orderData.subcontractor || !orderData.engineer || !orderData.contractingCompany || !orderData.projectName || !orderData.subcontractorSales || !orderData.unitPrice || !orderData.paymentTerms || !orderData.settlement || !orderData.settlementLowerLimit || !orderData.settlementUpperLimit || !orderData.overtimeUnitPrice || !orderData.deductionUnitPrice || !orderData.settlementTimeUnit || !orderData.dailyRateSetting || !orderData.entryDate || !orderData.expectedExitDate) {
+                alert('新增注文書失敗！所有欄位都必須填寫。');
                 return;
             }
 
             $.ajax({
-                url: '/api/partners/add',
+                url: '/api/orders/add',
                 type: 'POST',
                 contentType: 'application/json',
-                data: JSON.stringify(partnerData),
+                data: JSON.stringify(orderData),
                 success: function(data) {
-                    alert('合作夥伴新增成功！');
-                    fetchPartners();
+                    alert('注文書新增成功！');
+                    fetchOrders();
                 },
                 error: function(error) {
-                    alert('新增合作夥伴失敗！');
+                    alert('新增注文書失敗！');
                 }
             });
         });
 
-        $(document).on('click', '#select-all-partners', function() {
-            $('.partner-checkbox').prop('checked', this.checked).trigger('change');
+        $(document).on('click', '#select-all-orders', function() {
+            $('.order-checkbox').prop('checked', this.checked).trigger('change');
         });
 
-        $(document).on('change', '.partner-checkbox', function() {
-            var anyChecked = $('.partner-checkbox:checked').length > 0;
-            $('#delete-selected-partners').toggle(anyChecked);
-            $('#send-mail-to-partners-btn').toggle(anyChecked);
+        $(document).on('change', '.order-checkbox', function() {
+            var anyChecked = $('.order-checkbox:checked').length > 0;
+            $('#global-operation-buttons').toggle(anyChecked);
         });
 
-        $(document).on('click', '#delete-selected-partners', function() {
-            var selectedCheckboxes = $('.partner-checkbox:checked');
+        $(document).on('click', '#delete-selected-orders', function() {
+            var selectedCheckboxes = $('.order-checkbox:checked');
+            var selectedIds = [];
             selectedCheckboxes.each(function() {
-                alert('刪除按鈕成功！');
+                var orderId = $(this).closest('tr').data('id');
+                selectedIds.push(orderId);
             });
-            $('.partner-checkbox:checked').prop('checked', false).trigger('change');
+            var confirmation = confirm("确定要批量删除所选注文書吗？");
+            if (confirmation) {
+                $.ajax({
+                    url: '/api/orders/delete',
+                    type: 'DELETE',
+                    contentType: 'application/json',
+                    data: JSON.stringify(selectedIds),
+                    success: function(response) {
+                        alert('删除成功');
+                        fetchOrders();
+                    },
+                    error: function(xhr, status, error) {
+                        alert('删除失败');
+                    }
+                });
+            } else {
+                alert('已取消');
+            }
+            $('.order-checkbox:checked').prop('checked', false).trigger('change');
         });
 
-        $(document).on('click', '#send-mail-to-partners-btn', function() {
+        $(document).on('click', '#send-mail-to-orders-btn', function() {
             var mailSubject = $('#partner-mail-subject').val();
             var mailBody = $('#partner-mail-body').val();
             var mailAccount = $('#email-account').val();
             var mailPassword = $('#email-password').val();
-            var selectedEmails = $('.partner-checkbox:checked').map(function() {
+            var selectedEmails = $('.order-checkbox:checked').map(function() {
                 return $(this).data('email');
             }).get();
 
@@ -179,21 +247,18 @@
             };
 
             $.ajax({
-                url: '/api/employees/sendEmails',
+                url: '/api/orders/sendEmails',
                 type: 'POST',
                 contentType: 'application/json',
                 data: JSON.stringify(emailDetails),
                 success: function(data) {
-                    console.log(data);
                     alert('邮件发送成功！');
                 },
                 error: function(xhr, status, error) {
-                    console.error(error);
                     alert('邮件发送失败！');
                 }
             });
         });
-        
 
         $(document).on('click', '.edit-order', function() {
             var row = $(this).closest('tr');
@@ -203,40 +268,46 @@
             var contractingCompany = row.find('td:eq(3)').text();
             var projectName = row.find('td:eq(4)').text();
             var subcontractorSales = row.find('td:eq(5)').text();
-            var unitPrice = row.find('td:eq(6)').text();
-            var paymentTerms = row.find('td:eq(7)').text();
-            var settlement = row.find('td:eq(8)').text();
-            var settlementLowerLimit = row.find('td:eq(9)').text();
-            var settlementUpperLimit = row.find('td:eq(10)').text();
-            var overtimeUnitPrice = row.find('td:eq(11)').text();
-            var deductionUnitPrice = row.find('td:eq(12)').text();
-            var settlementTimeUnit = row.find('td:eq(13)').text();
-            var dailyRateSetting = row.find('td:eq(14)').text();
-            var entryDate = row.find('td:eq(15)').text();
-            var expectedExitDate = row.find('td:eq(16)').text();
-    
+            var job_details = row.find('td:eq(6)').text();
+            var work_place = row.find('td:eq(7)').text();
+            var person_month = row.find('td:eq(8)').text();
+            var unitPrice = row.find('td:eq(9)').text();
+            var paymentTerms = row.find('td:eq(10)').text();
+            var settlement = row.find('td:eq(11)').text();
+            var settlementLowerLimit = row.find('td:eq(12)').text();
+            var settlementUpperLimit = row.find('td:eq(13)').text();
+            var overtimeUnitPrice = row.find('td:eq(14)').text();
+            var deductionUnitPrice = row.find('td:eq(15)').text();
+            var settlementTimeUnit = row.find('td:eq(16)').text();
+            var dailyRateSetting = row.find('td:eq(17)').text();
+            var entryDate = row.find('td:eq(18)').text();
+            var expectedExitDate = row.find('td:eq(19)').text();
+
             // Convert row to editable fields
             row.find('td:eq(1)').html('<input type="text" class="form-control" value="' + subcontractor + '">');
             row.find('td:eq(2)').html('<input type="text" class="form-control" value="' + engineer + '">');
             row.find('td:eq(3)').html('<input type="text" class="form-control" value="' + contractingCompany + '">');
             row.find('td:eq(4)').html('<input type="text" class="form-control" value="' + projectName + '">');
             row.find('td:eq(5)').html('<input type="text" class="form-control" value="' + subcontractorSales + '">');
-            row.find('td:eq(6)').html('<input type="text" class="form-control" value="' + unitPrice + '">');
-            row.find('td:eq(7)').html('<input type="date" class="form-control" value="' + paymentTerms + '">');
-            row.find('td:eq(8)').html('<input type="text" class="form-control" value="' + settlement + '">');
-            row.find('td:eq(9)').html('<input type="text" class="form-control" value="' + settlementLowerLimit + '">');
-            row.find('td:eq(10)').html('<input type="text" class="form-control" value="' + settlementUpperLimit + '">');
-            row.find('td:eq(11)').html('<input type="text" class="form-control" value="' + overtimeUnitPrice + '">');
-            row.find('td:eq(12)').html('<input type="text" class="form-control" value="' + deductionUnitPrice + '">');
-            row.find('td:eq(13)').html('<input type="text" class="form-control" value="' + settlementTimeUnit + '">');
-            row.find('td:eq(14)').html('<input type="text" class="form-control" value="' + dailyRateSetting + '">');
-            row.find('td:eq(15)').html('<input type="date" class="form-control" value="' + entryDate + '">');
-            row.find('td:eq(16)').html('<input type="date" class="form-control" value="' + expectedExitDate + '">');
-    
+            row.find('td:eq(6)').html('<input type="text" class="form-control" value="' + job_details + '">');
+            row.find('td:eq(7)').html('<input type="text" class="form-control" value="' + work_place + '">');
+            row.find('td:eq(8)').html('<input type="text" class="form-control" value="' + person_month + '">');
+            row.find('td:eq(9)').html('<input type="text" class="form-control" value="' + unitPrice + '">');
+            row.find('td:eq(10)').html('<input type="text" class="form-control" value="' + paymentTerms + '">');
+            row.find('td:eq(11)').html('<input type="text" class="form-control" value="' + settlement + '">');
+            row.find('td:eq(12)').html('<input type="text" class="form-control" value="' + settlementLowerLimit + '">');
+            row.find('td:eq(13)').html('<input type="text" class="form-control" value="' + settlementUpperLimit + '">');
+            row.find('td:eq(14)').html('<input type="text" class="form-control" value="' + overtimeUnitPrice + '">');
+            row.find('td:eq(15)').html('<input type="text" class="form-control" value="' + deductionUnitPrice + '">');
+            row.find('td:eq(16)').html('<input type="text" class="form-control" value="' + settlementTimeUnit + '">');
+            row.find('td:eq(17)').html('<input type="text" class="form-control" value="' + dailyRateSetting + '">');
+            row.find('td:eq(18)').html('<input type="date" class="form-control" value="' + entryDate + '">');
+            row.find('td:eq(19)').html('<input type="date" class="form-control" value="' + expectedExitDate + '">');
+
             // Change button to save button
             $(this).removeClass('edit-order').addClass('save-order').text('保存');
         });
-    
+
         $(document).on('click', '.save-order', function() {
             var row = $(this).closest('tr');
             var orderId = row.data('id');
@@ -246,19 +317,22 @@
                 contractingCompany: row.find('td:eq(3) input').val(),
                 projectName: row.find('td:eq(4) input').val(),
                 subcontractorSales: row.find('td:eq(5) input').val(),
-                unitPrice: row.find('td:eq(6) input').val(),
-                paymentTerms: row.find('td:eq(7) input').val(),
-                settlement: row.find('td:eq(8) input').val(),
-                settlementLowerLimit: row.find('td:eq(9) input').val(),
-                settlementUpperLimit: row.find('td:eq(10) input').val(),
-                overtimeUnitPrice: row.find('td:eq(11) input').val(),
-                deductionUnitPrice: row.find('td:eq(12) input').val(),
-                settlementTimeUnit: row.find('td:eq(13) input').val(),
-                dailyRateSetting: row.find('td:eq(14) input').val(),
-                entryDate: row.find('td:eq(15) input').val(),
-                expectedExitDate: row.find('td:eq(16) input').val()
+                job_details: row.find('td:eq(6) input').val(),
+                work_place: row.find('td:eq(7) input').val(),
+                person_month: row.find('td:eq(8) input').val(),
+                unitPrice: row.find('td:eq(9) input').val(),
+                paymentTerms: row.find('td:eq(10) input').val(),
+                settlement: row.find('td:eq(11) input').val(),
+                settlementLowerLimit: row.find('td:eq(12) input').val(),
+                settlementUpperLimit: row.find('td:eq(13) input').val(),
+                overtimeUnitPrice: row.find('td:eq(14) input').val(),
+                deductionUnitPrice: row.find('td:eq(15) input').val(),
+                settlementTimeUnit: row.find('td:eq(16) input').val(),
+                dailyRateSetting: row.find('td:eq(17) input').val(),
+                entryDate: row.find('td:eq(18) input').val(),
+                expectedExitDate: row.find('td:eq(19) input').val()
             };
-    
+
             $.ajax({
                 url: '/api/orders/update/' + orderId,
                 type: 'PUT',
@@ -266,11 +340,19 @@
                 data: JSON.stringify(orderData),
                 success: function(data) {
                     alert('契約更新成功！');
-                    fetchPartners();
+                    fetchOrders();
                 },
                 error: function(error) {
                     alert('契約更新失敗！');
                 }
+            });
+        });
+
+        $(document).on('click', '#export-order-btn', function() {
+            var selectedCheckboxes = $('.order-checkbox:checked');
+            selectedCheckboxes.each(function() {
+                var orderId = $(this).closest('tr').data('id');
+                window.location.href = '/api/orders/export/' + orderId;
             });
         });
     });
