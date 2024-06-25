@@ -194,7 +194,12 @@
         }
 
         // Fetch and display the invoices when the page loads
-        fetchInvoiceCreations();
+        fetchInvoiceCreations({
+            parentCompany: 'ALL',
+            orderNumber: 'ALL',
+            engineer: 'ALL',
+            keyword: ''
+        });
 
         $('#search-btn').click(function() {
             var searchParams = {
