@@ -1,0 +1,18 @@
+services:
+  - type: web
+    name: my-java-app
+    env: java
+    plan: free # 根据您的需要可以选择不同的计划
+    buildCommand: ./gradlew build
+    startCommand: java -jar build/libs/my-java-app-0.0.1-SNAPSHOT.jar
+    envVars:
+      - key: SPRING_DATASOURCE_URL
+        value: jdbc:mysql://localhost:3306/test?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
+      - key: SPRING_DATASOURCE_USERNAME
+        value: root
+      - key: SPRING_DATASOURCE_PASSWORD
+        value: a27382722
+      - key: SPRING_DATASOURCE_PASSWORD
+        value: a27382722
+    healthCheckPath: /actuator/health
+    autoDeploy: true
