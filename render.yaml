@@ -12,6 +12,6 @@ services:
       - key: SPRING_DATASOURCE_USERNAME
         value: root
       - key: SPRING_DATASOURCE_PASSWORD
-        value: a27382722
+        value: asd098514
     healthCheckPath: /actuator/health
     autoDeploy: true

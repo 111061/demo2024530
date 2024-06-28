@@ -1,17 +1,18 @@
-# 使用官方的 OpenJDK 17 作为基础镜像
 FROM openjdk:17-jdk-slim
 
-# 设置工作目录
 WORKDIR /app
 
-# 将项目的所有文件复制到容器中
-COPY . .
+COPY gradlew /app/gradlew
+COPY gradle /app/gradle
+COPY build.gradle /app/build.gradle
+COPY settings.gradle /app/settings.gradle
+COPY src /app/src
 
-# 构建项目
-RUN ./gradlew build
+RUN apt-get update && apt-get install -y dos2unix
+RUN dos2unix /app/gradlew && chmod +x /app/gradlew
 
-# 暴露应用程序运行的端口（假设是8080）
-EXPOSE 8080
+RUN ls -l /app/gradlew
+RUN /app/gradlew build -x test
 
 # 运行生成的 JAR 文件
 CMD ["java", "-jar", "build/libs/demo-0.0.1-SNAPSHOT.jar"]
