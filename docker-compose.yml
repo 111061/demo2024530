@@ -1,0 +1,30 @@
+version: '3.8'
+services:
+  my-mysql:
+    image: mysql:8.0
+    container_name: my-mysql
+    environment:
+      MYSQL_ROOT_PASSWORD: asd098514
+      MYSQL_DATABASE: test
+    networks:
+      - my-network
+
+  myapp:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: myapp_container
+    depends_on:
+      - my-mysql
+    environment:
+      SPRING_DATASOURCE_URL: jdbc:mysql://my-mysql:3306/test?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
+      SPRING_DATASOURCE_USERNAME: root
+      SPRING_DATASOURCE_PASSWORD: asd098514
+    ports:
+      - "8080:8080"
+    networks:
+      - my-network
+
+networks:
+  my-network:
+    driver: bridge
