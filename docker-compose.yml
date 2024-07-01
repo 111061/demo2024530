@@ -1,11 +1,12 @@
 version: '3.8'
 services:
-  my-mysql:
-    image: mysql:8.0
-    container_name: my-mysql
+  my-postgres:
+    image: postgres:13
+    container_name: my-postgres
     environment:
-      MYSQL_ROOT_PASSWORD: asd098514
-      MYSQL_DATABASE: test
+      POSTGRES_USER: test
+      POSTGRES_PASSWORD: QQQqwfyUyF6jxNxskpeKLTsNThYLMNHf
+      POSTGRES_DB: test_5zth
     networks:
       - my-network
 
@@ -15,11 +16,13 @@ services:
       dockerfile: Dockerfile
     container_name: myapp_container
     depends_on:
-      - my-mysql
+      - my-postgres
     environment:
-      SPRING_DATASOURCE_URL: jdbc:mysql://my-mysql:3306/test?useSSL=false&serverTimezone=UTC&allowPublicKeyRetrieval=true
-      SPRING_DATASOURCE_USERNAME: root
-      SPRING_DATASOURCE_PASSWORD: asd098514
+      SPRING_DATASOURCE_URL: jdbc:postgresql://my-postgres:5432/test_5zth
+      SPRING_DATASOURCE_USERNAME: test
+      SPRING_DATASOURCE_PASSWORD: QQQqwfyUyF6jxNxskpeKLTsNThYLMNHf
+      SPRING_DATASOURCE_DRIVER-CLASS-NAME: org.postgresql.Driver
+      SPRING_JPA_HIBERNATE_DIALECT: org.hibernate.dialect.PostgreSQLDialect
     ports:
       - "8080:8080"
     networks:
