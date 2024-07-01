@@ -1,4 +1,5 @@
-FROM openjdk:17-jdk-slim
+# 使用官方的 OpenJDK 镜像作为基础镜像
+FROM openjdk:17-jdk-slim AS builder
 
 WORKDIR /app
 
@@ -14,5 +15,8 @@ RUN dos2unix /app/gradlew && chmod +x /app/gradlew
 RUN ls -l /app/gradlew
 RUN /app/gradlew build -x test
 
-# 运行生成的 JAR 文件
-CMD ["java", "-jar", "build/libs/demo-0.0.1-SNAPSHOT.jar"]
+# 使用官方的 OpenJDK 镜像作为运行时基础镜像
+FROM openjdk:17-jdk-slim
+WORKDIR /app
+COPY --from=builder /app/build/libs/demo-0.0.1-SNAPSHOT.jar /app/demo.jar
+ENTRYPOINT ["java", "-jar", "/app/demo.jar"]
