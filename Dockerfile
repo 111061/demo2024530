@@ -1,22 +1,19 @@
-# 使用官方的 OpenJDK 镜像作为基础镜像
-FROM openjdk:17-jdk-slim AS builder
+# 使用OpenJDK基础镜像
+FROM openjdk:11-jre-slim
 
+# 设置工作目录
 WORKDIR /app
 
-COPY gradlew /app/gradlew
-COPY gradle /app/gradle
-COPY build.gradle /app/build.gradle
-COPY settings.gradle /app/settings.gradle
-COPY src /app/src
+# 安装 curl
+RUN apt-get update && apt-get install -y curl
 
-RUN apt-get update && apt-get install -y dos2unix
-RUN dos2unix /app/gradlew && chmod +x /app/gradlew
+# 下载第一个 JAR 文件
+# 将 <GOOGLE_DRIVE_FILE_ID_1> 替换为您的第一个Google Drive文件ID
+RUN curl -L -o demo-0.0.1-SNAPSHOT-plain.jar "https://drive.google.com/uc?export=download&id=13R8fcDb_DWh1PoauTrsetbbyHd6UybKv"
 
-RUN ls -l /app/gradlew
-RUN /app/gradlew build -x test
+# 下载第二个 JAR 文件
+# 将 <GOOGLE_DRIVE_FILE_ID_2> 替换为您的第二个Google Drive文件ID
+RUN curl -L -o demo-0.0.1-SNAPSHOT.jar "https://drive.google.com/uc?export=download&id=1suWMU8hu6sNlK0xnpAYR536qcxKM3LM4"
 
-# 使用官方的 OpenJDK 镜像作为运行时基础镜像
-FROM openjdk:17-jdk-slim
-WORKDIR /app
-COPY --from=builder /app/build/libs/demo-0.0.1-SNAPSHOT.jar /app/demo.jar
-ENTRYPOINT ["java", "-jar", "/app/demo.jar"]
+# 如果您想要同时运行两个JAR文件，可以使用以下CMD
+CMD ["sh", "-c", "java -jar demo-0.0.1-SNAPSHOT-plain.jar & java -jar demo-0.0.1-SNAPSHOT.jar"]
