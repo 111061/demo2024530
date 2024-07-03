@@ -17,15 +17,15 @@ RUN /app/gradlew build -x test
 # 安裝 curl
 RUN apt-get update && apt-get install -y curl
 
-# 下載 JAR 文件
-# 將 <GOOGLE_DRIVE_FILE_ID> 替換為您的Google Drive文件ID
-RUN curl -L -o demo-0.0.1-SNAPSHOT.jar "https://drive.google.com/uc?export=download&id=13aS0PVsv3lVmhJDopeZqA9kp-bUiSFGf"
 
-# 设置环境变量
-ENV SPRING_DATASOURCE_URL=jdbc:postgresql://dpg-cpv6fblumphs73c6hgt0-a/test_5zth
-ENV SPRING_DATASOURCE_USERNAME=test
-ENV SPRING_DATASOURCE_PASSWORD=QQQqwfyUyF6jxNxskpeKLTsNThYLMNHf
-ENV SPRING_JPA_PROPERTIES_HIBERNATE_DIALECT=org.hibernate.dialect.PostgreSQLDialect
+# 下载 JAR 文件并增加重试机制
+# 将 <FILE_ID> 替换为您的 Google Drive 文件 ID
+RUN curl -L --retry 5 --retry-delay 10 -o demo-0.0.1-SNAPSHOT.jar "https://drive.google.com/uc?export=download&id=13aS0PVsv3lVmhJDopeZqA9kp-bUiSFGf" \
+    && echo "Downloaded JAR file size:" \
+    && ls -lh demo-0.0.1-SNAPSHOT.jar \
+    && echo "Checking file type:" \
+    && file demo-0.0.1-SNAPSHOT.jar
+
 
 
 # 运行下载的 JAR 文件
