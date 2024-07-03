@@ -15,7 +15,7 @@ RUN ls -l /app/gradlew
 RUN /app/gradlew build -x test
 
 # 安裝 curl
-RUN apt-get update && apt-get install -y curl
+RUN apt-get update && apt-get install -y curl file
 
 
 # 下载 JAR 文件并增加重试机制
