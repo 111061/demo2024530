@@ -19,8 +19,7 @@ RUN apt-get update && apt-get install -y curl
 
 # 下载 JAR 文件
 # 使用 GitHub Release 链接替换 <GITHUB_RELEASE_URL>
-RUN curl -L -o demo-0.0.1-SNAPSHOT.jar "https://github.com/your-username/your-repo/releases/download/v1.0.0/demo-0.0.1-SNAPSHOT.jar"
-
+RUN curl -L -o demo-0.0.1-SNAPSHOT.jar "https://github.com/111061/demo2024530/releases/download/v1.0.0/demo-0.0.1-SNAPSHOT.jar"
 # 设置环境变量
 ENV SPRING_DATASOURCE_URL=jdbc:postgresql://dpg-cpv6fblumphs73c6hgt0-a/test_5zth
 ENV SPRING_DATASOURCE_USERNAME=test
