@@ -19,7 +19,7 @@ RUN apt-get update && apt-get install -y curl
 
 # 下載 JAR 文件
 # 將 <GOOGLE_DRIVE_FILE_ID> 替換為您的Google Drive文件ID
-RUN curl -L -o demo-0.0.1-SNAPSHOT.jar "https://drive.google.com/uc?export=download&id=1LdGxOpI0Mbv7iyoVCwt28AaaEvEf_TcV"
+RUN curl -L -o demo-0.0.1-SNAPSHOT.jar "https://drive.google.com/uc?export=download&id=13aS0PVsv3lVmhJDopeZqA9kp-bUiSFGf"
 
 # 设置环境变量
 ENV SPRING_DATASOURCE_URL=jdbc:postgresql://dpg-cpv6fblumphs73c6hgt0-a/test_5zth
