@@ -21,6 +21,12 @@ RUN apt-get update && apt-get install -y curl
 # 将 <GITHUB_RELEASE_URL> 替换为您的 GitHub Release 下载链接
 RUN curl -L -o demo-0.0.1-SNAPSHOT.jar "https://github.com/111061/demo2024530/releases/download/v1.0.0/demo-0.0.1-SNAPSHOT.jar"
 
+# 设置环境变量
+ENV SPRING_DATASOURCE_URL=jdbc:postgresql://dpg-cpv6fblumphs73c6hgt0-a/test_5zth
+ENV SPRING_DATASOURCE_USERNAME=test
+ENV SPRING_DATASOURCE_PASSWORD=QQQqwfyUyF6jxNxskpeKLTsNThYLMNHf
+ENV SPRING_DATASOURCE_DRIVER-CLASS-NAME=org.postgresql.Driver
+ENV SPRING_JPA_PROPERTIES_HIBERNATE_DIALECT=org.hibernate.dialect.PostgreSQLDialect
 
 
 # 运行下载的 JAR 文件
