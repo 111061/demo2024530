@@ -11,6 +11,9 @@ COPY src /app/src
 RUN apt-get update && apt-get install -y dos2unix
 RUN dos2unix /app/gradlew && chmod +x /app/gradlew
 
+# 复制静态资源文件
+COPY src/main/resources/static /app/static
+
 RUN ls -l /app/gradlew
 RUN /app/gradlew build -x test
 
